@@ -53,6 +53,16 @@ directory "#{nginx_path}/conf/sites.d" do
   notifies :reload, 'service[passenger]'
 end
 
+template "#{nginx_path}/conf/sites.d/site.conf" do
+  source 'site.conf.erb'
+  owner 'root'
+  group 'root'
+  mode 0644
+  variables(
+    :nginx_path => nginx_path
+  )
+end
+
 template "#{nginx_path}/conf/nginx.conf" do
   source "nginx.conf.erb"
   owner "root"
@@ -102,8 +112,21 @@ service "passenger" do
   pattern "nginx: master"
 end
 
-cookbook_file '/opt/local/nginx/ssl/uganda.rapidftr.com.pem' do
-  source 'uganda.rapidftr.com.pem'
+directory "#{nginx_path}/ssl" do
+  mode 0755
+  action :create
+  recursive true
+end
+
+cookbook_file "#{nginx_path}/ssl/uganda.rapidftr.com.crt" do
+  source 'uganda.rapidftr.com.crt'
+  owner 'root'
+  group 'root'
+  mode 0600
+end
+
+cookbook_file "#{nginx_path}/ssl/uganda.rapidftr.com.key" do
+  source 'uganda.rapidftr.com.key'
   owner 'root'
   group 'root'
   mode 0600
