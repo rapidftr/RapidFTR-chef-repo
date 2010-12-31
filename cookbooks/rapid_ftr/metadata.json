@@ -1,0 +1,29 @@
+{
+  "providing": {
+  },
+  "recipes": {
+  },
+  "attributes": {
+  },
+  "maintainer": "YOUR_COMPANY_NAME",
+  "replacing": {
+  },
+  "dependencies": {
+  },
+  "maintainer_email": "YOUR_EMAIL",
+  "groupings": {
+  },
+  "recommendations": {
+  },
+  "platforms": {
+  },
+  "license": "All rights reserved",
+  "version": "0.0.1",
+  "suggestions": {
+  },
+  "name": "rapid_ftr",
+  "conflicting": {
+  },
+  "long_description": "= DESCRIPTION:\n\n= REQUIREMENTS:\n\n= ATTRIBUTES:\n\n= USAGE:\n\n",
+  "description": "Installs/Configures rapid_ftr"
+}
