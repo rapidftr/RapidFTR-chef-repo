@@ -102,3 +102,10 @@ service "passenger" do
   pattern "nginx: master"
 end
 
+cookbook_file '/opt/local/nginx/ssl/uganda.rapidftr.com.pem' do
+  source 'uganda.rapidftr.com.pem'
+  owner 'root'
+  group 'root'
+  mode 0600
+end
+

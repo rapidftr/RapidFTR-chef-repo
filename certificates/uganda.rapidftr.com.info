@@ -1,0 +1,51 @@
+SHA1 Fingerprint=7E:28:94:0E:2C:73:8A:17:01:F5:97:E7:07:91:AB:62:A6:85:FC:92
+Certificate:
+    Data:
+        Version: 1 (0x0)
+        Serial Number:
+            ad:21:03:a4:ab:9f:25:32
+        Signature Algorithm: sha1WithRSAEncryption
+        Issuer: C=US, ST=Several, L=Locality, O=Example Com, OU=Operations, CN=uganda.rapidftr.com/emailAddress=ops@example.com
+        Validity
+            Not Before: Dec 31 05:17:43 2010 GMT
+            Not After : Dec 28 05:17:43 2020 GMT
+        Subject: C=US, ST=Several, L=Locality, O=Example Com, OU=Operations, CN=uganda.rapidftr.com/emailAddress=ops@example.com
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (2048 bit)
+                Modulus:
+                    00:b4:db:ea:94:53:ac:ca:35:f2:17:bd:a8:e6:63:
+                    19:47:33:74:a0:d3:e1:d6:ba:2c:87:48:4c:36:fa:
+                    85:3f:2d:36:0b:77:fe:c1:54:55:bc:f0:28:b0:a3:
+                    7a:d7:44:12:35:5b:20:a6:65:37:76:0e:1d:0d:01:
+                    ed:bd:3d:4f:43:74:82:38:ae:e5:89:e8:7d:ea:9e:
+                    c1:a7:ed:62:f0:ea:16:83:8e:8e:71:88:5c:75:6f:
+                    63:ae:d0:59:b0:7d:a7:f8:6f:25:9d:c1:71:3c:23:
+                    7f:a6:93:0b:79:74:53:72:86:17:59:0b:81:cc:c3:
+                    28:b0:05:71:1f:28:51:ae:eb:59:25:fa:4e:06:6d:
+                    06:c1:61:af:d5:5c:6d:7c:a0:8c:4d:9c:af:72:be:
+                    15:32:5c:02:27:5a:17:37:c1:48:6f:2d:31:db:f2:
+                    8d:a6:a1:39:8a:da:0b:5e:82:5e:cf:73:c0:d3:9f:
+                    2e:61:25:fe:53:b8:d0:ca:2d:21:e0:3c:62:78:f6:
+                    b2:18:7d:1e:c1:89:55:67:e7:d5:0d:3d:b8:df:70:
+                    71:fc:24:2c:bc:0c:9b:24:53:76:2d:fe:af:6c:f5:
+                    aa:a6:59:7b:b9:62:4f:68:9a:af:9c:86:99:6b:af:
+                    7c:e4:35:54:7a:09:cb:0f:31:0c:13:64:9e:54:d0:
+                    6c:fb
+                Exponent: 65537 (0x10001)
+    Signature Algorithm: sha1WithRSAEncryption
+        14:98:a5:d5:26:92:1d:ae:24:d4:d4:e7:2b:11:b1:3b:10:01:
+        dd:5c:da:3a:71:9e:5d:91:96:1e:94:19:97:61:0e:da:8b:ed:
+        40:ed:fa:26:fe:dd:81:c2:60:4c:53:b3:96:0f:88:00:d9:de:
+        08:5c:a1:49:ea:e1:53:c0:3f:56:4d:e3:4c:cb:27:9e:40:d5:
+        1e:1b:d8:0b:67:f2:83:b3:26:64:1b:6e:3b:c5:ee:12:2e:ef:
+        e7:c5:f0:78:4c:da:c3:76:17:96:53:08:19:88:7f:41:7d:94:
+        a2:f8:05:b5:0e:48:be:a2:07:c3:ac:a7:64:f0:3d:b4:bf:e5:
+        bc:0e:a7:d8:ec:54:76:de:c8:a8:5a:27:3d:7e:3d:24:09:01:
+        62:7b:d0:db:e5:22:07:5f:c6:a3:d0:c9:51:ce:e1:cb:f1:04:
+        0b:d2:0e:c3:60:52:ff:d2:be:8c:49:9f:19:ff:01:f5:1a:f7:
+        c7:dd:8e:9c:13:b7:98:5a:4c:21:10:00:cc:fa:e4:db:0f:c8:
+        ff:69:27:70:76:4c:16:70:45:ef:38:06:2e:f4:20:a5:5b:a7:
+        86:ba:01:c7:b5:04:64:5a:03:4d:98:4c:2d:ea:af:81:5d:93:
+        a4:a8:82:ed:67:61:92:14:c4:d3:46:e6:9d:a9:2d:16:58:d9:
+        64:9d:ac:f6
