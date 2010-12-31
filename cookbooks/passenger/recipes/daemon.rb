@@ -16,7 +16,7 @@ nginx_path = node[:passenger][:production][:path]
 bash "install passenger/nginx" do
   user "root"
   code <<-EOH
-  passenger-install-nginx-module --auto --auto-download --prefix="#{nginx_path}" --extra-configure-flags="#{node[:passenger][:production][:configure_flags]}"
+  `gem environment gemdir`/bin/passenger-install-nginx-module --auto --auto-download --prefix="#{nginx_path}" --extra-configure-flags="#{node[:passenger][:production][:configure_flags]}"
   EOH
   not_if "test -e #{nginx_path}"
   not_if "test -e /usr/local/rvm"
