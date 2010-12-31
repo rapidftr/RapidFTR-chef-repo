@@ -12,11 +12,12 @@ if ['ubuntu', 'debian'].member? node[:platform]
 end
 
 nginx_path = node[:passenger][:production][:path]
+passenger_bins_path = "/var/lib/gems/1.8/bin" 
 
 bash "install passenger/nginx" do
   user "root"
   code <<-EOH
-  `gem environment gemdir`/bin/passenger-install-nginx-module --auto --auto-download --prefix="#{nginx_path}" --extra-configure-flags="#{node[:passenger][:production][:configure_flags]}"
+  #{passenger_bins_path}/passenger-install-nginx-module --auto --auto-download --prefix="#{nginx_path}" --extra-configure-flags="#{node[:passenger][:production][:configure_flags]}"
   EOH
   not_if "test -e #{nginx_path}"
   not_if "test -e /usr/local/rvm"
@@ -25,7 +26,7 @@ end
 bash "install passenger/nginx from rvm" do
   user "root"
   code <<-EOH
-  /usr/local/bin/rvm exec passenger-install-nginx-module --auto --auto-download --prefix="#{nginx_path}" --extra-configure-flags="#{node[:passenger][:production][:configure_flags]}"
+  /usr/local/bin/rvm exec #{passenger_bins_path}/passenger-install-nginx-module --auto --auto-download --prefix="#{nginx_path}" --extra-configure-flags="#{node[:passenger][:production][:configure_flags]}"
   EOH
   not_if "test -e #{nginx_path}"
   only_if "test -e /usr/local/rvm"
@@ -59,28 +60,17 @@ template "#{nginx_path}/conf/nginx.conf" do
   mode 0644
   variables(
     :log_path => log_path,
-    :passenger_root => "##PASSENGER_ROOT##",
-    :ruby_path => "##RUBY_PATH##",
+    :passenger_root => `#{passenger_bins_path}/passenger-config --root`,
+    :ruby_path => `which ruby`,
     :passenger => node[:passenger][:production],
     :pidfile => "#{nginx_path}/nginx.pid"
   )
-  notifies :run, 'bash[config_patch]'
 end
 
 cookbook_file "#{nginx_path}/sbin/config_patch.sh" do
   owner "root"
   group "root"
   mode 0755
-end
-
-bash "config_patch" do
-  # The big problem is that we can't compute the gem install path
-  # because we don't know what ruby version we're being installed
-  # on if RVM is present.
-#  only_if "grep '##PASSENGER_ROOT##' #{nginx_path}/conf/nginx.conf"
-  user "root"
-  code "#{nginx_path}/sbin/config_patch.sh #{nginx_path}/conf/nginx.conf"
-  notifies :reload, 'service[passenger]'
 end
 
 template "/etc/init.d/passenger" do
