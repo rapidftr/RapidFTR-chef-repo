@@ -59,7 +59,8 @@ template "#{nginx_path}/conf/sites.d/site.conf" do
   group 'root'
   mode 0644
   variables(
-    :nginx_path => nginx_path
+    :nginx_path => nginx_path,
+    :fqdn => node[:fqdn]
   )
 end
 

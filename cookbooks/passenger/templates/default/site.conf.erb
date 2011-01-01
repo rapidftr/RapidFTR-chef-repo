@@ -1,17 +1,17 @@
 # Redirect http to https.
 server {
   listen 80;
-  server_name dev.rapidftr.com;
-  rewrite ^(.*) https://dev.rapidftr.com$1 permanent;
+  server_name <%= @fqdn %>;
+  rewrite ^(.*) https://<%= @fqdn %>$1 permanent;
 }
 
 server {
   listen       443;
-  server_name dev.rapidftr.com;
+  server_name <%= @fqdn %>;
 
   ssl                  on;
-  ssl_certificate      <%= @nginx_path %>/ssl/rapidftrdev.crt;
-  ssl_certificate_key  <%= @nginx_path %>/ssl/rapidftrdev.key;
+  ssl_certificate      <%= @nginx_path %>/ssl/uganda.rapidftr.com.crt;
+  ssl_certificate_key  <%= @nginx_path %>/ssl/uganda.rapidftr.com.key;
   ssl_session_timeout  5m;
   ssl_protocols  SSLv2 SSLv3 TLSv1;
   ssl_ciphers  ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP;
@@ -19,5 +19,5 @@ server {
 
   passenger_enabled on;
   rails_env production;
-  root /home/admin/RapidFTR/public;
+  root /srv/rapid_ftr/current/public/;
 }

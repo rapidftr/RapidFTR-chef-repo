@@ -19,4 +19,4 @@ default[:passenger][:production][:gzip] = true
 default[:passenger][:production][:worker_connections] = 1024
 
 # Enable the status server on 127.0.0.1
-default[:passenger][:production][:status_server] = true
+default[:passenger][:production][:status_server] = false
