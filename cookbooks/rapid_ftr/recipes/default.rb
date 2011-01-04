@@ -6,8 +6,10 @@
 #
 # All rights reserved - Do Not Redistribute
 #
+package "default-jre-headless"
 package "libxml2-dev"
 package "libxslt1-dev"
+package "imagemagick"
 gem_package "rake"
 gem_package "bundler"
 
@@ -19,6 +21,23 @@ directory "/srv/rapid_ftr/shared" do
   action :create
 end
 
+directory "/srv/rapid_ftr/shared/log" do
+  owner "nobody"
+  group "admin"
+  mode "0755"
+  recursive true
+  action :create
+end
+
+directory "/srv/rapid_ftr/shared/config" do
+  owner "root"
+  group "root"
+  mode "0755"
+  recursive true
+  action :create
+end
+
+# we do not need to link database.yml. should change the "structure" here.
 deploy_revision "/srv/rapid_ftr" do
   repo "https://github.com/jorgej/RapidFTR.git"
   revision "HEAD"
