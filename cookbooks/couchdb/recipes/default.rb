@@ -53,6 +53,7 @@ cookbook_file "/etc/couchdb/local.ini" do
   owner "couchdb"
   group "couchdb"
   mode "0775"
+  notifies :restart, "service[couchdb]"
 end
 
 
