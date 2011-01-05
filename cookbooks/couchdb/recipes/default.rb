@@ -47,3 +47,12 @@ service "couchdb" do
   supports [ :restart, :status ]
   action [ :enable, :start ]
 end
+
+cookbook_file "/etc/couchdb/local.ini" do
+  source "local.ini"
+  owner "couchdb"
+  group "couchdb"
+  mode "0775"
+end
+
+
