@@ -40,7 +40,7 @@ end
 # we do not need to link database.yml. should change the "structure" here.
 deploy_revision "/srv/rapid_ftr" do
   repo "https://github.com/RapidFTR-Uganda/RapidFTR.git"
-  reference "release"
+  revision "release"
   user "root"
   enable_submodules true
   migrate true
