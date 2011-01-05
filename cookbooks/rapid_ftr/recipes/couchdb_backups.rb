@@ -2,7 +2,7 @@
   # this needs to be conditional, based on whether the database already exists
   # http_request "rapidftr_form_section_production" do
   #   action :put
-  #   url "http://admin:rapidftr_password@localhost:5984/#{db}/"
+  #   url "http://localhost:5984/#{db}/"
   # end
 end
 

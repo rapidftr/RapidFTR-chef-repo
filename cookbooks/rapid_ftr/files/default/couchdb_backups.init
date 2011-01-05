@@ -45,64 +45,64 @@ fi
 
 start_couchdb () {
     # Hit local couchDB with requests to initiate backups from remote server.
-    echo {\"source\":\"http://admin:rapidftr_password@${SOURCE_HOST}:5984/rapidftr_form_section_production/\", > /tmp/replication.json
-    echo  \"target\":\"http://admin:rapidftr_password@localhost:5984/rapidftr_form_section_production/\", >> /tmp/replication.json
+    echo {\"source\":\"http://${SOURCE_HOST}:5984/rapidftr_form_section_production/\", > /tmp/replication.json
+    echo  \"target\":\"http://localhost:5984/rapidftr_form_section_production/\", >> /tmp/replication.json
     echo  \"continuous\":true} >> /tmp/replication.json
-    $CURL -X POST http://admin:rapidftr_password@127.0.0.1:5984/_replicate -d @/tmp/replication.json
-    echo {\"source\":\"http://admin:rapidftr_password@${SOURCE_HOST}:5984/rapidftr_user_production/\", > /tmp/replication.json
-    echo  \"target\":\"http://admin:rapidftr_password@localhost:5984/rapidftr_user_production/\", >> /tmp/replication.json
+    $CURL -X POST http://127.0.0.1:5984/_replicate -d @/tmp/replication.json
+    echo {\"source\":\"http://${SOURCE_HOST}:5984/rapidftr_user_production/\", > /tmp/replication.json
+    echo  \"target\":\"http://localhost:5984/rapidftr_user_production/\", >> /tmp/replication.json
     echo  \"continuous\":true} >> /tmp/replication.json
-    $CURL -X POST http://admin:rapidftr_password@127.0.0.1:5984/_replicate -d @/tmp/replication.json
-    echo {\"source\":\"http://admin:rapidftr_password@${SOURCE_HOST}:5984/rapidftr_sessions_production/\", > /tmp/replication.json
-    echo  \"target\":\"http://admin:rapidftr_password@localhost:5984/rapidftr_sessions_production/\", >> /tmp/replication.json
+    $CURL -X POST http://127.0.0.1:5984/_replicate -d @/tmp/replication.json
+    echo {\"source\":\"http://${SOURCE_HOST}:5984/rapidftr_sessions_production/\", > /tmp/replication.json
+    echo  \"target\":\"http://localhost:5984/rapidftr_sessions_production/\", >> /tmp/replication.json
     echo  \"continuous\":true} >> /tmp/replication.json
-    $CURL -X POST http://admin:rapidftr_password@127.0.0.1:5984/_replicate -d @/tmp/replication.json
-    echo {\"source\":\"http://admin:rapidftr_password@${SOURCE_HOST}:5984/rapidftr_suggested_field_production/\", > /tmp/replication.json
-    echo  \"target\":\"http://admin:rapidftr_password@localhost:5984/rapidftr_suggested_field_production/\", >> /tmp/replication.json
+    $CURL -X POST http://127.0.0.1:5984/_replicate -d @/tmp/replication.json
+    echo {\"source\":\"http://${SOURCE_HOST}:5984/rapidftr_suggested_field_production/\", > /tmp/replication.json
+    echo  \"target\":\"http://localhost:5984/rapidftr_suggested_field_production/\", >> /tmp/replication.json
     echo  \"continuous\":true} >> /tmp/replication.json
-    $CURL -X POST http://admin:rapidftr_password@127.0.0.1:5984/_replicate -d @/tmp/replication.json
-    echo {\"source\":\"http://admin:rapidftr_password@${SOURCE_HOST}:5984/rapidftr_contact_information_production/\", > /tmp/replication.json
-    echo  \"target\":\"http://admin:rapidftr_password@localhost:5984/rapidftr_contact_information_production/\", >> /tmp/replication.json
+    $CURL -X POST http://127.0.0.1:5984/_replicate -d @/tmp/replication.json
+    echo {\"source\":\"http://${SOURCE_HOST}:5984/rapidftr_contact_information_production/\", > /tmp/replication.json
+    echo  \"target\":\"http://localhost:5984/rapidftr_contact_information_production/\", >> /tmp/replication.json
     echo  \"continuous\":true} >> /tmp/replication.json
-    $CURL -X POST http://admin:rapidftr_password@127.0.0.1:5984/_replicate -d @/tmp/replication.json
-    echo {\"source\":\"http://admin:rapidftr_password@${SOURCE_HOST}:5984/rapidftr_child_production/\", > /tmp/replication.json
-    echo  \"target\":\"http://admin:rapidftr_password@localhost:5984/rapidftr_child_production/\", >> /tmp/replication.json
+    $CURL -X POST http://127.0.0.1:5984/_replicate -d @/tmp/replication.json
+    echo {\"source\":\"http://${SOURCE_HOST}:5984/rapidftr_child_production/\", > /tmp/replication.json
+    echo  \"target\":\"http://localhost:5984/rapidftr_child_production/\", >> /tmp/replication.json
     echo  \"continuous\":true} >> /tmp/replication.json
-    $CURL -X POST http://admin:rapidftr_password@127.0.0.1:5984/_replicate -d @/tmp/replication.json
+    $CURL -X POST http://127.0.0.1:5984/_replicate -d @/tmp/replication.json
 
     rm /tmp/replication.json
 }
 
 stop_couchdb () {
     # Cancel the replications we started above.
-    $CURL -X POST http://admin:rapidftr_password@127.0.0.1:5984/_replicate \
-    -d "{'source':'http://admin:rapidftr_password@${SOURCE_HOST}:5984/rapidftr_form_section_production/',
-         'target':'http://admin:rapidftr_password@localhost:5984/rapidftr_form_section_production/',
+    $CURL -X POST http://127.0.0.1:5984/_replicate \
+    -d "{'source':'http://${SOURCE_HOST}:5984/rapidftr_form_section_production/',
+         'target':'http://localhost:5984/rapidftr_form_section_production/',
          'continuous':true,
          'cancel':true}"
-    $CURL -X POST http://admin:rapidftr_password@127.0.0.1:5984/_replicate \
-    -d "{'source':'http://admin:rapidftr_password@${SOURCE_HOST}:5984/rapidftr_user_production/',
-         'target':'http://admin:rapidftr_password@localhost:5984/rapidftr_user_production/',
+    $CURL -X POST http://127.0.0.1:5984/_replicate \
+    -d "{'source':'http://${SOURCE_HOST}:5984/rapidftr_user_production/',
+         'target':'http://localhost:5984/rapidftr_user_production/',
          'continuous':true,
          'cancel':true}"
-    $CURL -X POST http://admin:rapidftr_password@127.0.0.1:5984/_replicate \
-    -d "{'source':'http://admin:rapidftr_password@${SOURCE_HOST}:5984/rapidftr_sessions_production/',
-         'target':'http://admin:rapidftr_password@localhost:5984/rapidftr_sessions_production/',
+    $CURL -X POST http://127.0.0.1:5984/_replicate \
+    -d "{'source':'http://${SOURCE_HOST}:5984/rapidftr_sessions_production/',
+         'target':'http://localhost:5984/rapidftr_sessions_production/',
          'continuous':true,
          'cancel':true}"
-    $CURL -X POST http://admin:rapidftr_password@127.0.0.1:5984/_replicate \
-    -d "{'source':'http://admin:rapidftr_password@${SOURCE_HOST}:5984/rapidftr_suggested_field_production/',
-         'target':'http://admin:rapidftr_password@localhost:5984/rapidftr_suggested_field_production/',
+    $CURL -X POST http://127.0.0.1:5984/_replicate \
+    -d "{'source':'http://${SOURCE_HOST}:5984/rapidftr_suggested_field_production/',
+         'target':'http://localhost:5984/rapidftr_suggested_field_production/',
          'continuous':true,
          'cancel':true}"
-    $CURL -X POST http://admin:rapidftr_password@127.0.0.1:5984/_replicate \
-    -d "{'source':'http://admin:rapidftr_password@${SOURCE_HOST}:5984/rapidftr_contact_information_production/',
-         'target':'http://admin:rapidftr_password@localhost:5984/rapidftr_contact_information_production/',
+    $CURL -X POST http://127.0.0.1:5984/_replicate \
+    -d "{'source':'http://${SOURCE_HOST}:5984/rapidftr_contact_information_production/',
+         'target':'http://localhost:5984/rapidftr_contact_information_production/',
          'continuous':true,
          'cancel':true}"
-    $CURL -X POST http://admin:rapidftr_password@127.0.0.1:5984/_replicate \
-    -d "{'source':'http://admin:rapidftr_password@${SOURCE_HOST}:5984/rapidftr_child_production/',
-         'target':'http://admin:rapidftr_password@localhost:5984/rapidftr_child_production/',
+    $CURL -X POST http://127.0.0.1:5984/_replicate \
+    -d "{'source':'http://${SOURCE_HOST}:5984/rapidftr_child_production/',
+         'target':'http://localhost:5984/rapidftr_child_production/',
          'continuous':true,
          'cancel':true}"
   
