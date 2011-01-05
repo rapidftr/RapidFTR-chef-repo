@@ -17,14 +17,11 @@ DESCRIPTION="RapidFTR database backups"
 NAME=couchdb_backups
 SCRIPT_NAME=`basename $0`
 CURL=/usr/bin/curl
-SOURCE_HOST=
+SOURCE_HOST=li153-112.members.linode.com
+LSB_LIBRARY=/lib/lsb/init-functions
 
-if test ! -x $COUCHDB; then
+if test ! -x $CURL; then
     exit $SCRIPT_ERROR
-fi
-
-if test -r $CONFIGURATION_FILE; then
-    . $CONFIGURATION_FILE
 fi
 
 log_daemon_msg () {
@@ -47,64 +44,68 @@ if test -r $LSB_LIBRARY; then
 fi
 
 start_couchdb () {
-    # Start Apache CouchDB as a background process.
+    # Hit local couchDB with requests to initiate backups from remote server.
+    echo {\"source\":\"http://admin:rapidftr_password@${SOURCE_HOST}:5984/rapidftr_form_section_production/\", > /tmp/replication.json
+    echo  \"target\":\"http://admin:rapidftr_password@localhost:5984/rapidftr_form_section_production/\", >> /tmp/replication.json
+    echo  \"continuous\":true} >> /tmp/replication.json
+    $CURL -X POST http://admin:rapidftr_password@127.0.0.1:5984/_replicate -d @/tmp/replication.json
+    echo {\"source\":\"http://admin:rapidftr_password@${SOURCE_HOST}:5984/rapidftr_user_production/\", > /tmp/replication.json
+    echo  \"target\":\"http://admin:rapidftr_password@localhost:5984/rapidftr_user_production/\", >> /tmp/replication.json
+    echo  \"continuous\":true} >> /tmp/replication.json
+    $CURL -X POST http://admin:rapidftr_password@127.0.0.1:5984/_replicate -d @/tmp/replication.json
+    echo {\"source\":\"http://admin:rapidftr_password@${SOURCE_HOST}:5984/rapidftr_sessions_production/\", > /tmp/replication.json
+    echo  \"target\":\"http://admin:rapidftr_password@localhost:5984/rapidftr_sessions_production/\", >> /tmp/replication.json
+    echo  \"continuous\":true} >> /tmp/replication.json
+    $CURL -X POST http://admin:rapidftr_password@127.0.0.1:5984/_replicate -d @/tmp/replication.json
+    echo {\"source\":\"http://admin:rapidftr_password@${SOURCE_HOST}:5984/rapidftr_suggested_field_production/\", > /tmp/replication.json
+    echo  \"target\":\"http://admin:rapidftr_password@localhost:5984/rapidftr_suggested_field_production/\", >> /tmp/replication.json
+    echo  \"continuous\":true} >> /tmp/replication.json
+    $CURL -X POST http://admin:rapidftr_password@127.0.0.1:5984/_replicate -d @/tmp/replication.json
+    echo {\"source\":\"http://admin:rapidftr_password@${SOURCE_HOST}:5984/rapidftr_contact_information_production/\", > /tmp/replication.json
+    echo  \"target\":\"http://admin:rapidftr_password@localhost:5984/rapidftr_contact_information_production/\", >> /tmp/replication.json
+    echo  \"continuous\":true} >> /tmp/replication.json
+    $CURL -X POST http://admin:rapidftr_password@127.0.0.1:5984/_replicate -d @/tmp/replication.json
+    echo {\"source\":\"http://admin:rapidftr_password@${SOURCE_HOST}:5984/rapidftr_child_production/\", > /tmp/replication.json
+    echo  \"target\":\"http://admin:rapidftr_password@localhost:5984/rapidftr_child_production/\", >> /tmp/replication.json
+    echo  \"continuous\":true} >> /tmp/replication.json
+    $CURL -X POST http://admin:rapidftr_password@127.0.0.1:5984/_replicate -d @/tmp/replication.json
 
-    command="$COUCHDB -b"
-    if test -n "$COUCHDB_STDOUT_FILE"; then
-        command="$command -o $COUCHDB_STDOUT_FILE"
-    fi
-    if test -n "$COUCHDB_STDERR_FILE"; then
-        command="$command -e $COUCHDB_STDERR_FILE"
-    fi
-    if test -n "$COUCHDB_RESPAWN_TIMEOUT"; then
-        command="$command -r $COUCHDB_RESPAWN_TIMEOUT"
-    fi
-    if test -n "$COUCHDB_OPTIONS"; then
-        command="$command $COUCHDB_OPTIONS"
-    fi
-    mkdir -p "$RUN_DIR"
-    if test -n "$COUCHDB_USER"; then
-        chown $COUCHDB_USER "$RUN_DIR"
-        if su $COUCHDB_USER -c "$command" > /dev/null; then
-            return $SCRIPT_OK
-        else
-            return $SCRIPT_ERROR
-        fi
-    else
-        if $command > /dev/null; then
-            return $SCRIPT_OK
-        else
-            return $SCRIPT_ERROR
-        fi
-    fi
+    rm /tmp/replication.json
 }
 
 stop_couchdb () {
-    # Stop the running Apache CouchDB process.
-
-    command="$COUCHDB -d"
-    if test -n "$COUCHDB_OPTIONS"; then
-        command="$command $COUCHDB_OPTIONS"
-    fi
-    if test -n "$COUCHDB_USER"; then
-        if su $COUCHDB_USER -c "$command" > /dev/null; then
-            return $SCRIPT_OK
-        else
-            return $SCRIPT_ERROR
-        fi
-    else
-        if $command > /dev/null; then
-            return $SCRIPT_OK
-        else
-            return $SCRIPT_ERROR
-        fi
-    fi
-}
-
-display_status () {
-    # Display the status of the running Apache CouchDB process.
-
-    $COUCHDB -s
+    # Cancel the replications we started above.
+    $CURL -X POST http://admin:rapidftr_password@127.0.0.1:5984/_replicate \
+    -d "{'source':'http://admin:rapidftr_password@${SOURCE_HOST}:5984/rapidftr_form_section_production/',
+         'target':'http://admin:rapidftr_password@localhost:5984/rapidftr_form_section_production/',
+         'continuous':true,
+         'cancel':true}"
+    $CURL -X POST http://admin:rapidftr_password@127.0.0.1:5984/_replicate \
+    -d "{'source':'http://admin:rapidftr_password@${SOURCE_HOST}:5984/rapidftr_user_production/',
+         'target':'http://admin:rapidftr_password@localhost:5984/rapidftr_user_production/',
+         'continuous':true,
+         'cancel':true}"
+    $CURL -X POST http://admin:rapidftr_password@127.0.0.1:5984/_replicate \
+    -d "{'source':'http://admin:rapidftr_password@${SOURCE_HOST}:5984/rapidftr_sessions_production/',
+         'target':'http://admin:rapidftr_password@localhost:5984/rapidftr_sessions_production/',
+         'continuous':true,
+         'cancel':true}"
+    $CURL -X POST http://admin:rapidftr_password@127.0.0.1:5984/_replicate \
+    -d "{'source':'http://admin:rapidftr_password@${SOURCE_HOST}:5984/rapidftr_suggested_field_production/',
+         'target':'http://admin:rapidftr_password@localhost:5984/rapidftr_suggested_field_production/',
+         'continuous':true,
+         'cancel':true}"
+    $CURL -X POST http://admin:rapidftr_password@127.0.0.1:5984/_replicate \
+    -d "{'source':'http://admin:rapidftr_password@${SOURCE_HOST}:5984/rapidftr_contact_information_production/',
+         'target':'http://admin:rapidftr_password@localhost:5984/rapidftr_contact_information_production/',
+         'continuous':true,
+         'cancel':true}"
+    $CURL -X POST http://admin:rapidftr_password@127.0.0.1:5984/_replicate \
+    -d "{'source':'http://admin:rapidftr_password@${SOURCE_HOST}:5984/rapidftr_child_production/',
+         'target':'http://admin:rapidftr_password@localhost:5984/rapidftr_child_production/',
+         'continuous':true,
+         'cancel':true}"
+  
 }
 
 parse_script_option_list () {
@@ -139,12 +140,9 @@ parse_script_option_list () {
                 log_end_msg $SCRIPT_ERROR
             fi
             ;;
-        status)
-            display_status
-            ;;
         *)
             cat << EOF >&2
-Usage: $SCRIPT_NAME {start|stop|restart|force-reload|status}
+Usage: $SCRIPT_NAME {start|stop|restart|force-reload}
 EOF
             exit $SCRIPT_ERROR
             ;;
