@@ -1,32 +1,32 @@
 {
-  "providing": {
+  "version": "0.0.1",
+  "replacing": {
+  },
+  "maintainer_email": "james@sociable.co.nz",
+  "groupings": {
+  },
+  "description": "Installs passenger via rubygems. Explicity uses system-wide RVM if present.",
+  "recommendations": {
+  },
+  "attributes": {
+  },
+  "suggestions": {
+  },
+  "dependencies": {
   },
   "recipes": {
     "passenger::install": "Install the passenger gem",
     "passenger::daemon": "Install passenger/nginx as a service.",
     "passenger::standalone": "Install passenger/nginx and start it as standalone."
   },
-  "attributes": {
-  },
-  "maintainer": "James Harton, Sociable Limited.",
-  "replacing": {
-  },
-  "dependencies": {
-  },
-  "maintainer_email": "james@sociable.co.nz",
-  "groupings": {
-  },
-  "recommendations": {
+  "conflicting": {
   },
   "platforms": {
   },
-  "license": "MIT",
-  "version": "0.0.1",
-  "suggestions": {
-  },
   "name": "passenger",
-  "conflicting": {
+  "providing": {
   },
-  "long_description": "",
-  "description": "Installs passenger via rubygems. Explicity uses system-wide RVM if present."
+  "license": "MIT",
+  "maintainer": "James Harton, Sociable Limited.",
+  "long_description": ""
 }
