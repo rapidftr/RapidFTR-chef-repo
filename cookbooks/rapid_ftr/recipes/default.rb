@@ -47,6 +47,6 @@ deploy_revision "/srv/rapid_ftr" do
   migration_command "/usr/bin/bundle install"
   environment "RAILS_ENV" => "production"
   shallow_clone true
-  action :force_deploy
+  action :deploy
   restart_command "touch tmp/restart.txt"
 end
