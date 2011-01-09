@@ -5,7 +5,6 @@ server {
   rewrite ^(.*) https://<%= @fqdn %>$1 permanent;
 }
 
-ssl                  on;
 ssl_certificate      <%= @nginx_path %>/ssl/uganda.rapidftr.com.crt;
 ssl_certificate_key  <%= @nginx_path %>/ssl/uganda.rapidftr.com.key;
 ssl_session_timeout  5m;
@@ -15,6 +14,7 @@ ssl_prefer_server_ciphers   on;
 
 server {
   listen       443;
+  ssl          on;
   server_name <%= @fqdn %>;
 
   passenger_enabled on;
@@ -24,6 +24,7 @@ server {
 
 server {
   listen       5443;
+  ssl          on;
   server_name <%= @fqdn %>;
 
   location / {
