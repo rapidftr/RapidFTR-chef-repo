@@ -60,7 +60,9 @@ template "#{nginx_path}/conf/sites.d/site.conf" do
   mode 0644
   variables(
     :nginx_path => nginx_path,
-    :fqdn => node[:fqdn]
+    :fqdn => 'uganda.rapidftr.com',
+    :ssl_certificate => '/home/admin/concatenated.dev.rapidftr.com.crt',
+    :ssl_certificate_key => '/home/admin/dev.rapidftr.com.key'
   )
 end
 

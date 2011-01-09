@@ -17,7 +17,8 @@ DESCRIPTION="RapidFTR database backups"
 NAME=couchdb_backups
 SCRIPT_NAME=`basename $0`
 CURL=/usr/bin/curl
-SOURCE_HOST=li153-112.members.linode.com
+SOURCE_HOST=uganda.rapidftr.com
+SOURCE_SITE=https://${SOURCE_HOST}:5443
 LSB_LIBRARY=/lib/lsb/init-functions
 
 if test ! -x $CURL; then
@@ -45,27 +46,27 @@ fi
 
 start_couchdb () {
     # Hit local couchDB with requests to initiate backups from remote server.
-    echo {\"source\":\"https://${SOURCE_HOST}:5443/rapidftr_form_section_production/\", > /tmp/replication.json
+    echo {\"source\":\"${SOURCE_SITE}/rapidftr_form_section_production/\", > /tmp/replication.json
     echo  \"target\":\"rapidftr_form_section_production\", >> /tmp/replication.json
     echo  \"continuous\":true} >> /tmp/replication.json
     $CURL -X POST http://127.0.0.1:5984/_replicate -d @/tmp/replication.json
-    echo {\"source\":\"https://${SOURCE_HOST}:5443/rapidftr_user_production/\", > /tmp/replication.json
+    echo {\"source\":\"${SOURCE_SITE}/rapidftr_user_production/\", > /tmp/replication.json
     echo  \"target\":\"rapidftr_user_production\", >> /tmp/replication.json
     echo  \"continuous\":true} >> /tmp/replication.json
     $CURL -X POST http://127.0.0.1:5984/_replicate -d @/tmp/replication.json
-    echo {\"source\":\"https://${SOURCE_HOST}:5443/rapidftr_sessions_production/\", > /tmp/replication.json
+    echo {\"source\":\"${SOURCE_SITE}/rapidftr_sessions_production/\", > /tmp/replication.json
     echo  \"target\":\"rapidftr_sessions_production\", >> /tmp/replication.json
     echo  \"continuous\":true} >> /tmp/replication.json
     $CURL -X POST http://127.0.0.1:5984/_replicate -d @/tmp/replication.json
-    echo {\"source\":\"https://${SOURCE_HOST}:5443/rapidftr_suggested_field_production/\", > /tmp/replication.json
+    echo {\"source\":\"${SOURCE_SITE}/rapidftr_suggested_field_production/\", > /tmp/replication.json
     echo  \"target\":\"rapidftr_suggested_field_production\", >> /tmp/replication.json
     echo  \"continuous\":true} >> /tmp/replication.json
     $CURL -X POST http://127.0.0.1:5984/_replicate -d @/tmp/replication.json
-    echo {\"source\":\"https://${SOURCE_HOST}:5443/rapidftr_contact_information_production/\", > /tmp/replication.json
+    echo {\"source\":\"${SOURCE_SITE}/rapidftr_contact_information_production/\", > /tmp/replication.json
     echo  \"target\":\"rapidftr_contact_information_production\", >> /tmp/replication.json
     echo  \"continuous\":true} >> /tmp/replication.json
     $CURL -X POST http://127.0.0.1:5984/_replicate -d @/tmp/replication.json
-    echo {\"source\":\"https://${SOURCE_HOST}:5443/rapidftr_child_production/\", > /tmp/replication.json
+    echo {\"source\":\"${SOURCE_SITE}/rapidftr_child_production/\", > /tmp/replication.json
     echo  \"target\":\"rapidftr_child_production\", >> /tmp/replication.json
     echo  \"continuous\":true} >> /tmp/replication.json
     $CURL -X POST http://127.0.0.1:5984/_replicate -d @/tmp/replication.json
@@ -75,37 +76,37 @@ start_couchdb () {
 
 stop_couchdb () {
     # Cancel the replications we started above.
-    echo {\"source\":\"https://${SOURCE_HOST}:5443/rapidftr_form_section_production/\", > /tmp/cancel.json
+    echo {\"source\":\"${SOURCE_SITE}/rapidftr_form_section_production/\", > /tmp/cancel.json
     echo \"target\":\"rapidftr_form_section_production\", >> /tmp/cancel.json
     echo \"continuous\":true, >> /tmp/cancel.json
     echo \"cancel\":true} >> /tmp/cancel.json
     $CURL -X POST http://127.0.0.1:5984/_replicate -d @/tmp/cancel.json
 
-    echo {\"source\":\"https://${SOURCE_HOST}:5443/rapidftr_user_production/\", > /tmp/cancel.json
+    echo {\"source\":\"${SOURCE_SITE}/rapidftr_user_production/\", > /tmp/cancel.json
     echo \"target\":\"rapidftr_user_production\", >> /tmp/cancel.json
     echo \"continuous\":true, >> /tmp/cancel.json
     echo \"cancel\":true} >> /tmp/cancel.json
     $CURL -X POST http://127.0.0.1:5984/_replicate -d @/tmp/cancel.json
 
-    echo {\"source\":\"https://${SOURCE_HOST}:5443/rapidftr_sessions_production/\", > /tmp/cancel.json
+    echo {\"source\":\"${SOURCE_SITE}/rapidftr_sessions_production/\", > /tmp/cancel.json
     echo \"target\":\"rapidftr_sessions_production\", >> /tmp/cancel.json
     echo \"continuous\":true, >> /tmp/cancel.json
     echo \"cancel\":true} >> /tmp/cancel.json
     $CURL -X POST http://127.0.0.1:5984/_replicate -d @/tmp/cancel.json
 
-    echo {\"source\":\"https://${SOURCE_HOST}:5443/rapidftr_suggested_field_production/\", > /tmp/cancel.json
+    echo {\"source\":\"${SOURCE_SITE}/rapidftr_suggested_field_production/\", > /tmp/cancel.json
     echo \"target\":\"rapidftr_suggested_field_production\", >> /tmp/cancel.json
     echo \"continuous\":true, >> /tmp/cancel.json
     echo \"cancel\":true} >> /tmp/cancel.json
     $CURL -X POST http://127.0.0.1:5984/_replicate -d @/tmp/cancel.json
 
-    echo {\"source\":\"https://${SOURCE_HOST}:5443/rapidftr_contact_information_production/\", > /tmp/cancel.json
+    echo {\"source\":\"${SOURCE_SITE}/rapidftr_contact_information_production/\", > /tmp/cancel.json
     echo \"target\":\"rapidftr_contact_information_production\", >> /tmp/cancel.json
     echo \"continuous\":true, >> /tmp/cancel.json
     echo \"cancel\":true} >> /tmp/cancel.json
     $CURL -X POST http://127.0.0.1:5984/_replicate -d @/tmp/cancel.json
 
-    echo {\"source\":\"https://${SOURCE_HOST}:5443/rapidftr_child_production/\", > /tmp/cancel.json
+    echo {\"source\":\"${SOURCE_SITE}/rapidftr_child_production/\", > /tmp/cancel.json
     echo \"target\":\"rapidftr_child_production\", >> /tmp/cancel.json
     echo \"continuous\":true, >> /tmp/cancel.json
     echo \"cancel\":true} >> /tmp/cancel.json
