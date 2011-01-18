@@ -37,6 +37,18 @@ directory "/srv/rapid_ftr/shared/config" do
   action :create
 end
 
+cookbook_file "/etc/init.d/solr" do
+  source "solr.init"
+  owner "root"
+  group "root"
+  mode "0744"
+end
+
+service "solr" do
+  supports :restart => true
+  action [:enable, :start]
+end
+
 # we do not need to link database.yml. should change the "structure" here.
 deploy_revision "/srv/rapid_ftr" do
   repo "https://github.com/RapidFTR-Uganda/RapidFTR.git"
