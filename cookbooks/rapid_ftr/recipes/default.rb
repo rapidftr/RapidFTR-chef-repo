@@ -37,6 +37,22 @@ directory "/srv/rapid_ftr/shared/config" do
   action :create
 end
 
+directory "/srv/rapid_ftr/shared/system" do
+  owner "root"
+  group "root"
+  mode "0755"
+  recursive true
+  action :create
+end
+
+directory "/srv/rapid_ftr/shared/system/bb-builds" do
+  owner "root"
+  group "admin"
+  mode "0775"
+  recursive true
+  action :create
+end
+
 cookbook_file "/etc/init.d/solr" do
   source "solr.init"
   owner "root"
@@ -49,7 +65,6 @@ service "solr" do
   action [:enable, :start]
 end
 
-# we do not need to link database.yml. should change the "structure" here.
 deploy_revision "/srv/rapid_ftr" do
   repo "https://github.com/RapidFTR-Uganda/RapidFTR.git"
   revision "release"
@@ -61,4 +76,9 @@ deploy_revision "/srv/rapid_ftr" do
   shallow_clone true
   action :deploy
   restart_command "touch tmp/restart.txt"
+  symlinks(
+    "system" => "public/system",
+    "log" => "log",
+    "system/bb-builds/latest" => "public/blackberry")
+  symlink_before_migrate nil # to skip database.yml
 end
