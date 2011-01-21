@@ -13,6 +13,18 @@ package "imagemagick"
 gem_package "rake"
 gem_package "bundler"
 
+cookbook_file "/etc/init.d/solr" do
+  source "solr.init"
+  owner "root"
+  group "root"
+  mode "0744"
+end
+
+service "solr" do
+  supports :restart => true
+  action [:enable, :start]
+end
+
 directory "/srv/rapid_ftr/shared" do
   owner "root"
   group "root"
@@ -29,12 +41,19 @@ directory "/srv/rapid_ftr/shared/log" do
   action :create
 end
 
-directory "/srv/rapid_ftr/shared/config" do
+directory "/srv/rapid_ftr/shared/config/initializers" do
   owner "root"
   group "root"
   mode "0755"
   recursive true
   action :create
+end
+
+file "/srv/rapid_ftr/shared/config/initializers/hoptoad.rb" do
+  action :touch # in case one with a proper api_key isn't in place.
+  owner "root"
+  group "root"
+  mode "0644"
 end
 
 directory "/srv/rapid_ftr/shared/system" do
@@ -47,22 +66,10 @@ end
 
 directory "/srv/rapid_ftr/shared/system/bb-builds" do
   owner "root"
-  group "admin"
+  group "admin" # so the script to copy a new build doesn't have to sudo.
   mode "0775"
   recursive true
   action :create
-end
-
-cookbook_file "/etc/init.d/solr" do
-  source "solr.init"
-  owner "root"
-  group "root"
-  mode "0744"
-end
-
-service "solr" do
-  supports :restart => true
-  action [:enable, :start]
 end
 
 deploy_revision "/srv/rapid_ftr" do
@@ -76,9 +83,16 @@ deploy_revision "/srv/rapid_ftr" do
   shallow_clone true
   action :deploy
   restart_command "touch tmp/restart.txt"
+  purge_before_symlink %w(
+    log
+    tmp/pids
+    public/system
+    config/initializers/hoptoad.rb
+    )
   symlinks(
     "system" => "public/system",
     "log" => "log",
-    "system/bb-builds/latest" => "public/blackberry")
+    "system/bb-builds/latest" => "public/blackberry",
+    "config/initializers/hoptoad.rb" => "config/initializers/hoptoad.rb")
   symlink_before_migrate nil # to skip database.yml
 end
