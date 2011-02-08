@@ -20,3 +20,7 @@ default[:passenger][:production][:worker_connections] = 1024
 
 # Enable the status server on 127.0.0.1
 default[:passenger][:production][:status_server] = false
+
+default[:rapid_ftr][:app_server_fqdn] = node[:fqdn]
+default[:rapid_ftr][:ssl_certificate] = '/home/admin/concatenated.dev.rapidftr.com.crt'
+default[:rapid_ftr][:ssl_certificate_key] = '/home/admin/dev.rapidftr.com.key'

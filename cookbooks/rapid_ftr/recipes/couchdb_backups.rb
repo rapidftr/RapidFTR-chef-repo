@@ -18,21 +18,9 @@ databases = %w(
   )
 
 cron "replicate_every_five_minutes" do
-  command "/usr/bin/couchdb_replicate.rb -s admin@uganda.rapidftr.com -i /home/admin/.ssh/id_rsa -d #{databases.join(',')}"
-  mailto "jhume@thoughtworks.com,jorgejust@gmail.com"
+  ssh_target = "#{node[:rapid_ftr][:app_server_ssh_user]}@#{node[:rapid_ftr][:app_server_ssh_hostname]}"
+  ssh_key = node[:rapid_ftr][:backup_server_ssh_key]
+  command "/usr/bin/couchdb_replicate.rb -s #{ssh_target} -i #{ssh_key} -d #{databases.join(',')}"
+  mailto node[:rapid_ftr][:backup_mailto]
   minute "*/5"
-end
-
-# The original attempt using continuous replication, which we couldn't get working with Nginx providing SSL.
-# Note service is stopped/disabled.
-cookbook_file "/etc/init.d/couchdb_backups" do
-  source "couchdb_backups.init"
-  owner "root"
-  group "root"
-  mode "0755"
-end
-
-service "couchdb_backups" do
-  supports :start => true, :stop => true, :restart => true
-  action [:stop, :disable]
 end

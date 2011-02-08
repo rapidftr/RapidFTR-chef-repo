@@ -73,7 +73,7 @@ directory "/srv/rapid_ftr/shared/system/bb-builds" do
 end
 
 deploy_revision "/srv/rapid_ftr" do
-  repo "https://github.com/RapidFTR-Uganda/RapidFTR.git"
+  repo node[:rapid_ftr][:repository]
   revision "release"
   user "root"
   enable_submodules true

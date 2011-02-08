@@ -1,0 +1,5 @@
+default[:rapid_ftr][:repository] = 'https://github.com/jorgej/RapidFTR.git'
+default[:rapid_ftr][:app_server_ssh_user] = 'admin'
+default[:rapid_ftr][:app_server_ssh_hostname] = 'uganda.rapidftr.com'
+default[:rapid_ftr][:backup_server_ssh_key] = '/home/admin/.ssh/id_rsa'
+default[:rapid_ftr][:backup_mailto] = 'jorgejust@gmail.com'

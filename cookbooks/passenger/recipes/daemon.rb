@@ -60,9 +60,9 @@ template "#{nginx_path}/conf/sites.d/site.conf" do
   mode 0644
   variables(
     :nginx_path => nginx_path,
-    :fqdn => 'uganda.rapidftr.com',
-    :ssl_certificate => '/home/admin/concatenated.dev.rapidftr.com.crt',
-    :ssl_certificate_key => '/home/admin/dev.rapidftr.com.key'
+    :fqdn => node[:rapid_ftr][:app_server_fqdn],
+    :ssl_certificate => node[:rapid_ftr][:ssl_certificate],
+    :ssl_certificate_key => node[:rapid_ftr][:ssl_certificate_key]
   )
 end
 
@@ -120,18 +120,3 @@ directory "#{nginx_path}/ssl" do
   action :create
   recursive true
 end
-
-cookbook_file "#{nginx_path}/ssl/uganda.rapidftr.com.crt" do
-  source 'uganda.rapidftr.com.crt'
-  owner 'root'
-  group 'root'
-  mode 0600
-end
-
-cookbook_file "#{nginx_path}/ssl/uganda.rapidftr.com.key" do
-  source 'uganda.rapidftr.com.key'
-  owner 'root'
-  group 'root'
-  mode 0600
-end
-
