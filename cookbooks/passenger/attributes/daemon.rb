@@ -17,6 +17,7 @@ default[:passenger][:production][:tcp_nopush] = false
 default[:passenger][:production][:keepalive_timeout] = 65
 default[:passenger][:production][:gzip] = true
 default[:passenger][:production][:worker_connections] = 1024
+default[:passenger][:production][:client_max_body_size] = '22m'
 
 # Enable the status server on 127.0.0.1
 default[:passenger][:production][:status_server] = false

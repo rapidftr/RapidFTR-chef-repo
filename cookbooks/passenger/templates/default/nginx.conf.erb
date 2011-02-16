@@ -24,6 +24,7 @@ http {
   tcp_nopush <%= @passenger[:tcp_nopush] ? 'on' : 'off' %>;
   keepalive_timeout <%= @passenger[:keepalive_timeout] %>;
   gzip <%= @passenger[:gzip] ? 'on' : 'off' %>;
+  client_max_body_size <%= @passenger[:client_max_body_size] %>;
 
   include sites.d/*.conf;
 
