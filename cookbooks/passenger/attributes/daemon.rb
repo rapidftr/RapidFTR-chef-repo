@@ -1,6 +1,7 @@
 default[:passenger][:production][:path] = '/opt/local/nginx'
 default[:passenger][:production][:configure_flags] = '--with-ipv6 --with-http_stub_status_module --with-http_ssl_module'
 default[:passenger][:production][:log_path] = '/var/log/passenger/'
+default[:passenger][:production][:bins_path] = '/var/lib/gems/1.8/bin'
 
 # Tune these for your environment, see:
 # http://www.modrails.com/documentation/Users%20guide%20Nginx.html#_resource_control_and_optimization_options

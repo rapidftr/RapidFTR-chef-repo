@@ -12,7 +12,7 @@ if ['ubuntu', 'debian'].member? node[:platform]
 end
 
 nginx_path = node[:passenger][:production][:path]
-passenger_bins_path = "/var/lib/gems/1.8/bin" 
+passenger_bins_path = node[:passenger][:production][:bins_path]
 
 bash "install passenger/nginx" do
   user "root"
