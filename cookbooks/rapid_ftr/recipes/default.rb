@@ -74,7 +74,7 @@ end
 
 deploy_revision "/srv/rapid_ftr" do
   repo node[:rapid_ftr][:repository]
-  revision "release"
+  revision node[:rapid_ftr][:revision]
   user "root"
   enable_submodules true
   migrate true

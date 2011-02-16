@@ -1,4 +1,5 @@
 default[:rapid_ftr][:repository] = 'git://github.com/jorgej/RapidFTR.git'
+default[:rapid_ftr][:revision] = 'master'
 default[:rapid_ftr][:app_server_ssh_user] = 'admin'
 default[:rapid_ftr][:app_server_ssh_hostname] = 'uganda.rapidftr.com'
 default[:rapid_ftr][:backup_server_ssh_key] = '/home/admin/.ssh/id_rsa'
