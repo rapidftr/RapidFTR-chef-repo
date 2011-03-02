@@ -67,6 +67,12 @@ apt-get -q -y install libcurl4-openssl-dev=7.21.0-1ubuntu1 returned 100, expecte
 # Then set up the database.
 sudo rake couchdb:create db:seed RAILS_ENV=production
 
+# Then the app worked except for search because the solr service wasn't running.
+# Restarted the machine, then solr was running and things looked good.
+# If children were inserted and not indexed, then
+cd /srv/rapid_ftr/current
+script/console
+	then Child.reindex!
 
 
 
