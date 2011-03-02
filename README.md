@@ -1,3 +1,78 @@
+RapidFTR Chef Setup
+===================
+
+This was originally set up for the Uganda deployment and used the Opscode platform. We're now working on getting it in shape to be usable via chef-solo.
+
+Here are the steps required. 
+
+# Start with a plain Linux install
+sudo apt-get upgrade
+
+# Install Ruby
+sudo apt-get install ruby ruby-dev libopenssl-ruby rdoc ri irb build-essential wget ssl-cert
+
+# and rubygems
+cd /tmp
+wget http://production.cf.rubygems.org/rubygems/rubygems-1.3.7.tgz
+tar zxf rubygems-1.3.7.tgz
+cd rubygems-1.3.7
+sudo ruby setup.rb --no-format-executable
+
+# Install chef
+sudo gem install chef
+
+# Put SSL certificates in place
+scp admin@uganda.rapidftr.com:/home/admin/concatenated.dev.rapidftr.com.crt ~
+scp admin@uganda.rapidftr.com:/home/admin/dev.rapidftr.com.key ~
+
+# Write these config files:
+
+# /etc/chef/solo.rb
+file_cache_path "/tmp/chef-solo"
+cookbook_path "/tmp/chef-solo/cookbooks"
+json_attribs "/etc/chef/node.json"
+recipe_url "https://github.com/downloads/duelinmarkers/RapidFTR-chef-repo/chef-repo.tgz"
+
+# /etc/chef/node.json
+{
+	"rapid_ftr":{
+		"ssl_certificate": "/home/rapidftr/concatenated.dev.rapidftr.com.crt",
+		"ssl_certificate_key": "/home/rapidftr/dev.rapidftr.com.key"
+	},
+	"passenger":{
+		"production":{
+			"bins_path": "/usr/bin"
+		}
+	},
+	"run_list": [
+		"recipe[build-essential::default]",
+		"recipe[passenger::daemon]",
+		"recipe[erlang::default]",
+		"recipe[couchdb::default]",
+		"recipe[git::default]",
+		"recipe[rapid_ftr::default]"]
+}
+
+# run chef-solo
+
+# First time failed with:
+[Tue, 01 Mar 2011 22:36:06 -0500] ERROR: package[libcurl4-openssl-dev] (/tmp/chef-solo/cookbooks/passenger/recipes/daemon.rb:10:in `from_file') had an error:
+apt-get -q -y install libcurl4-openssl-dev=7.21.0-1ubuntu1 returned 100, expected 0
+# because I hadn't updated packages, apparently. After a long slow update that package installed fine.
+
+# Then failed with:
+/usr/lib/ruby/gems/1.8/gems/chef-0.9.12/bin/../lib/chef/mixin/command.rb:184:in `handle_command_failures': /etc/init.d/couchdb restart returned 1, expected 0 (Chef::Exceptions::Exec)
+# But couch is running and looks fine. Manual sudo /etc/init.d/couchdb restart succeeded happily.
+
+# Then set up the database.
+sudo rake couchdb:create db:seed RAILS_ENV=production
+
+
+
+
+Chef README boilerplate
+================
+
 Overview
 ========
 
