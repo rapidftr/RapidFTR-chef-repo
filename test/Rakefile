@@ -1,0 +1,7 @@
+namespace :test do
+  task :deploy do
+    cd File.join(File.dirname(__FILE__), 'vagrant')
+    sh 'vagrant destroy'
+    sh 'vagrant up'
+  end
+end

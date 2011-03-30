@@ -17,7 +17,7 @@ passenger_bins_path = node[:passenger][:production][:bins_path]
 bash "install passenger/nginx" do
   user "root"
   code <<-EOH
-  #{passenger_bins_path}/passenger-install-nginx-module --auto --auto-download --prefix="#{nginx_path}" --extra-configure-flags="#{node[:passenger][:production][:configure_flags]}"
+  passenger-install-nginx-module --auto --auto-download --prefix="#{nginx_path}" --extra-configure-flags="#{node[:passenger][:production][:configure_flags]}"
   EOH
   not_if "test -e #{nginx_path}"
   not_if "test -e /usr/local/rvm"
@@ -26,7 +26,7 @@ end
 bash "install passenger/nginx from rvm" do
   user "root"
   code <<-EOH
-  /usr/local/bin/rvm exec #{passenger_bins_path}/passenger-install-nginx-module --auto --auto-download --prefix="#{nginx_path}" --extra-configure-flags="#{node[:passenger][:production][:configure_flags]}"
+  /usr/local/bin/rvm exec passenger-install-nginx-module --auto --auto-download --prefix="#{nginx_path}" --extra-configure-flags="#{node[:passenger][:production][:configure_flags]}"
   EOH
   not_if "test -e #{nginx_path}"
   only_if "test -e /usr/local/rvm"
@@ -73,7 +73,7 @@ template "#{nginx_path}/conf/nginx.conf" do
   mode 0644
   variables(
     :log_path => log_path,
-    :passenger_root => `#{passenger_bins_path}/passenger-config --root`,
+    :passenger_root => `passenger-config --root`,
     :ruby_path => `which ruby`,
     :passenger => node[:passenger][:production],
     :pidfile => "#{nginx_path}/nginx.pid"
