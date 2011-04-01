@@ -1,7 +1,25 @@
 namespace :test do
+
   task :deploy do
     cd File.join(File.dirname(__FILE__), 'vagrant')
     sh 'vagrant destroy'
     sh 'vagrant up'
+  end
+
+  task :setup_ssh do
+    cd File.join(File.dirname(__FILE__), 'vagrant')
+    sh "vagrant ssh_config > vagrant.ssh.config"
+  end
+
+  task :verify_services => 'test:setup_ssh' do
+    check_for_service 'Nginx http-to-https redirect', 'http://localhost/', 'Moved Permanently'
+    check_for_service 'Nginx login requirement', '--insecure https://localhost/', 'localhost/login'
+    check_for_service 'CouchDB', 'http://localhost:5984/', '"couchdb":"Welcome"'
+    check_for_service 'Solr', 'http://localhost:8902/solr/', 'Welcome to Solr'
+  end
+
+  def check_for_service name, url, pattern
+    puts "Checking for #{name}"
+    sh "ssh -F vagrant.ssh.config vagrant curl #{url}/ | grep '#{pattern}'"
   end
 end
