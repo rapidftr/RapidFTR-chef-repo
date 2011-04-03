@@ -1,3 +1,5 @@
+require 'rspec/core/rake_task'
+
 namespace :test do
 
   task :deploy do
@@ -9,6 +11,8 @@ namespace :test do
   task :setup_ssh do
     cd File.join(File.dirname(__FILE__), 'vagrant')
     sh "vagrant ssh_config > vagrant.ssh.config"
+    ENV['SSH_CONFIG'] = File.expand_path(File.dirname(__FILE__) + '/vagrant/vagrant.ssh.config')
+    cd File.dirname(__FILE__)
   end
 
   task :verify_services => 'test:setup_ssh' do
@@ -18,8 +22,14 @@ namespace :test do
     check_for_service 'Solr', 'http://localhost:8902/solr/', 'Welcome to Solr'
   end
 
+  RSpec::Core::RakeTask.new('system_spec') do |t|
+    t.rspec_opts = ["--color", "--format documentation", "--require ./spec_helper.rb"]
+    t.pattern = '*_spec.rb'
+  end
+  task 'system_spec' => 'test:setup_ssh'
+
   def check_for_service name, url, pattern
     puts "Checking for #{name}"
-    sh "ssh -F vagrant.ssh.config vagrant curl #{url}/ | grep '#{pattern}'"
+    sh "ssh -F #{ENV['SSH_CONFIG']} vagrant curl #{url}/ | grep '#{pattern}'"
   end
 end
