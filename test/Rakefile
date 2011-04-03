@@ -1,4 +1,9 @@
-require 'rspec/core/rake_task'
+begin
+  require 'rspec/core/rake_task'
+rescue LoadError
+  puts "\nRspec 2 is required. Try this: \n\t`gem install rspec-core rspec-expectations`.\n\n"
+  raise
+end
 
 desc "Deploy a fresh vagrant instance (destroying an existing instance)."
 task :deploy do
