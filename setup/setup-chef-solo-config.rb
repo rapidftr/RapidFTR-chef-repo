@@ -1,11 +1,14 @@
 # It's expected this file will be called from a setup shell script.
 # This sets up the config necessary to run chef-solo.
+require 'fileutils'
 require 'erb'
 require 'readline'
 
 repo_root = File.expand_path(File.dirname(__FILE__) + '/..')
 solo_config = "/etc/chef/solo.rb"
 node_attribute_file = '/etc/chef/node.json'
+
+FileUtils.mkdir_p "/etc/chef"
 
 puts "Writing #{solo_config}..."
 File.open(solo_config, 'w') do |file|

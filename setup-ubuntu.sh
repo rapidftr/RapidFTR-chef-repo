@@ -17,7 +17,8 @@ cd rubygems-$RUBYGEMS_VERSION
 sudo ruby setup.rb --no-format-executable
 
 echo "Installing chef..."
-sudo gem install chef
+sudo gem install chef --no-rdoc --no-ri
 
 echo "Setting up chef-solo..."
-ruby $CHEF_REPO_ROOT/setup/setup-chef-solo-config.rb
+cd $CHEF_REPO_ROOT
+sudo ruby setup/setup-chef-solo-config.rb

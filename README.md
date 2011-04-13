@@ -3,7 +3,16 @@ RapidFTR Chef Setup
 
 This was originally set up for the Uganda deployment and used the Opscode platform. We're now working on getting it in shape to be usable via chef-solo.
 
-Here are the steps required. 
+Here are the manual steps that should be required:
+
+# Download and untar
+wget --no-check-certificate https://github.com/downloads/duelinmarkers/RapidFTR-chef-repo/chef-repo-21cbb459.tgz
+tar xzf chef-repo-21cbb459.tgz
+cd chef-repo/
+sudo setup-ubuntu.sh
+Respond to prompts for SSL certificate files.
+
+Here are the manual steps required previously. 
 
 # Start with a plain Linux install
 sudo apt-get update
@@ -20,7 +29,7 @@ cd rubygems-1.3.7
 sudo ruby setup.rb --no-format-executable
 
 # Install chef
-sudo gem install chef
+sudo gem install chef --no-rdoc --no-ri
 
 # Put SSL certificates in place
 scp admin@uganda.rapidftr.com:/home/admin/concatenated.dev.rapidftr.com.crt ~
