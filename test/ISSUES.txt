@@ -1,0 +1,6 @@
+Solr service isn't running after initial install, though the output from chef-solo indicates it's started successfully.
+Maybe this is useful: http://stackoverflow.com/questions/2150767/how-to-start-solr-automatically
+
+No Rails logs. /srv/rapid_ftr/shared/log is supposed to be owned by 'nobody' so passenger can write to it, but after first boot up it's owned by 'root' so the log can't be created.
+Manually `sudo chown nobody /srv/rapid_ftr/shared/log` fixes it.
+
