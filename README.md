@@ -10,8 +10,16 @@ wget --no-check-certificate https://github.com/downloads/duelinmarkers/RapidFTR-
 tar xzf chef-repo-21cbb459.tgz
 cd chef-repo/
 sudo ./setup-ubuntu.sh
-Respond to prompts for SSL certificate files.
+# Say yes when prompted to install packages.
+# Respond to prompts for SSL certificate files with reasonable locations.
+# If you haven't already, copy SSL certificate files into those locations.
+sudo chef-solo
+# Get a cup of tea and a biscuit or two. This takes ages.
+sudo /etc/init.d/solr start # We don't know why this is necessary.
+cd /srv/rapid_ftr/current
+sudo rake couchdb:create db:seed RAILS_ENV=production
 
+-------------------------------------------------------
 Here are the manual steps required previously. 
 
 # Start with a plain Linux install
