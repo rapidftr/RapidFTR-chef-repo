@@ -9,7 +9,7 @@ Here are the manual steps that should be required:
 wget --no-check-certificate https://github.com/downloads/duelinmarkers/RapidFTR-chef-repo/chef-repo-21cbb459.tgz
 tar xzf chef-repo-21cbb459.tgz
 cd chef-repo/
-sudo setup-ubuntu.sh
+sudo ./setup-ubuntu.sh
 Respond to prompts for SSL certificate files.
 
 Here are the manual steps required previously. 

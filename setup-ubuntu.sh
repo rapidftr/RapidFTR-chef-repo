@@ -1,7 +1,11 @@
 #!/bin/bash
 
 RUBYGEMS_VERSION=1.7.2
-CHEF_REPO_ROOT=`dirname $0`
+
+INITIAL_DIR=`pwd`
+cd `dirname $0`
+CHEF_REPO_ROOT=`pwd`
+cd $INITIAL_DIR
 
 echo "Updating apt package index..."
 sudo apt-get update
@@ -20,5 +24,4 @@ echo "Installing chef..."
 sudo gem install chef --no-rdoc --no-ri
 
 echo "Setting up chef-solo..."
-cd $CHEF_REPO_ROOT
-sudo ruby setup/setup-chef-solo-config.rb
+sudo ruby $CHEF_REPO_ROOT/setup/setup-chef-solo-config.rb
