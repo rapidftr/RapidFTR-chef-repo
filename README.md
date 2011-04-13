@@ -6,7 +6,8 @@ This was originally set up for the Uganda deployment and used the Opscode platfo
 Here are the steps required. 
 
 # Start with a plain Linux install
-sudo apt-get upgrade
+sudo apt-get update
+# sudo apt-get upgrade # is that really needed? Shouldn't update be enough?
 
 # Install Ruby
 sudo apt-get install ruby ruby-dev libopenssl-ruby rdoc ri irb build-essential wget ssl-cert
@@ -32,6 +33,7 @@ file_cache_path "/tmp/chef-solo"
 cookbook_path "/tmp/chef-solo/cookbooks"
 json_attribs "/etc/chef/node.json"
 recipe_url "https://github.com/downloads/duelinmarkers/RapidFTR-chef-repo/chef-repo.tgz"
+# role_path "/var/chef-solo/roles"
 
 # /etc/chef/node.json
 {
