@@ -6,8 +6,8 @@ This was originally set up for the Uganda deployment and used the Opscode platfo
 Here are the manual steps that should be required:
 
 # Download and untar
-wget --no-check-certificate https://github.com/downloads/duelinmarkers/RapidFTR-chef-repo/chef-repo-21cbb459.tgz
-tar xzf chef-repo-21cbb459.tgz
+wget --no-check-certificate https://github.com/downloads/duelinmarkers/RapidFTR-chef-repo/chef-repo-3226f1.tgz
+tar xzf chef-repo-3226f1.tgz
 cd chef-repo/
 sudo ./setup-ubuntu.sh
 # Say yes when prompted to install packages.
