@@ -23,6 +23,7 @@ Here are the manual steps that should be required:
 	# If you haven't already, copy SSL certificate files into those locations.
 	sudo chef-solo
 	# Get a cup of tea and a biscuit or two. This takes ages.
+	
 	sudo /etc/init.d/solr start # We don't know why this is necessary.
 	cd /srv/rapid_ftr/current
 	sudo rake couchdb:create db:seed RAILS_ENV=production
@@ -79,25 +80,5 @@ Here are the manual steps required previously.
 			"recipe[git::default]",
 			"recipe[rapid_ftr::default]"]
 	}
-
-# run chef-solo
-
-# First time failed with:
-[Tue, 01 Mar 2011 22:36:06 -0500] ERROR: package[libcurl4-openssl-dev] (/tmp/chef-solo/cookbooks/passenger/recipes/daemon.rb:10:in `from_file') had an error:
-apt-get -q -y install libcurl4-openssl-dev=7.21.0-1ubuntu1 returned 100, expected 0
-# because I hadn't updated packages, apparently. After a long slow update that package installed fine.
-
-# Then failed with:
-/usr/lib/ruby/gems/1.8/gems/chef-0.9.12/bin/../lib/chef/mixin/command.rb:184:in `handle_command_failures': /etc/init.d/couchdb restart returned 1, expected 0 (Chef::Exceptions::Exec)
-# But couch is running and looks fine. Manual sudo /etc/init.d/couchdb restart succeeded happily.
-
-# Then set up the database.
-sudo rake couchdb:create db:seed RAILS_ENV=production
-
-# Then the app worked except for search because the solr service wasn't running.
-# Restarted the machine, then solr was running and things looked good.
-# If children were inserted and not indexed, then
-cd /srv/rapid_ftr/current
-script/console
-	then Child.reindex!
-
+	
+	# run chef-solo
