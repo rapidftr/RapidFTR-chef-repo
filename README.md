@@ -1,9 +1,8 @@
-RapidFTR Chef Setup
-===================
+# RapidFTR Chef Setup #
 
-This was originally set up for the Uganda deployment and used the Opscode platform. We're now working on getting it in shape to be usable via chef-solo.
+## Usage for Production Deployment ##
 
-Here are the manual steps that should be required:
+Here are the manual steps required:
 
 	# If you're logged in as root and don't yet have an admin account (likely on Linode):
 	adduser admin
@@ -28,8 +27,34 @@ Here are the manual steps that should be required:
 	cd /srv/rapid_ftr/current
 	sudo rake couchdb:create db:seed RAILS_ENV=production
 
--------------------------------------------------------
-Here are the manual steps required previously. 
+## Contributing ##
+
+To develop on the deployment platform:
+
+* Clone this repository.
+
+* Install Vagrant (<http://vagrantup.com/>).
+
+		gem install vagrant
+
+* Install at the least the core and expectations gems from Rspec-2.
+
+		gem install rspec-core rspec-expectations
+
+	You can also install all of rspec-2.
+
+		gem install rspec
+
+* From the test directory, run
+
+		rake full
+
+The (very slim) spec suite that lives in the test directory is ultimately intended to be runnable against a production deployment, not just locally, but it's not quite there yet.
+
+
+---
+
+Here are the manual steps previously required for production deployment.
 
 	# Start with a plain Linux install
 	sudo apt-get update
