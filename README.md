@@ -5,72 +5,80 @@ This was originally set up for the Uganda deployment and used the Opscode platfo
 
 Here are the manual steps that should be required:
 
-# Download and untar
-wget --no-check-certificate https://github.com/downloads/duelinmarkers/RapidFTR-chef-repo/chef-repo-3226f1.tgz
-tar xzf chef-repo-3226f1.tgz
-cd chef-repo/
-sudo ./setup-ubuntu.sh
-# Say yes when prompted to install packages.
-# Respond to prompts for SSL certificate files with reasonable locations.
-# If you haven't already, copy SSL certificate files into those locations.
-sudo chef-solo
-# Get a cup of tea and a biscuit or two. This takes ages.
-sudo /etc/init.d/solr start # We don't know why this is necessary.
-cd /srv/rapid_ftr/current
-sudo rake couchdb:create db:seed RAILS_ENV=production
+	# If you're logged in as root and don't yet have an admin account (likely on Linode):
+	adduser admin
+	# Provide a strong password. You can leave everything else blank.
+	usermod -a -G sudo admin
+	
+	# Now log out and log back in as admin.
+	# TODO: remove root's ability to log in?
+	
+	# Download and untar
+	wget --no-check-certificate https://github.com/downloads/duelinmarkers/RapidFTR-chef-repo/chef-repo-3226f1.tgz
+	tar xzf chef-repo-3226f1.tgz
+	cd chef-repo/
+	sudo ./setup-ubuntu.sh
+	# Say yes when prompted to install packages.
+	# Respond to prompts for SSL certificate files with reasonable locations.
+	# If you haven't already, copy SSL certificate files into those locations.
+	sudo chef-solo
+	# Get a cup of tea and a biscuit or two. This takes ages.
+	sudo /etc/init.d/solr start # We don't know why this is necessary.
+	cd /srv/rapid_ftr/current
+	sudo rake couchdb:create db:seed RAILS_ENV=production
 
 -------------------------------------------------------
 Here are the manual steps required previously. 
 
-# Start with a plain Linux install
-sudo apt-get update
-# sudo apt-get upgrade # is that really needed? Shouldn't update be enough?
-
-# Install Ruby
-sudo apt-get install ruby ruby-dev libopenssl-ruby rdoc ri irb build-essential wget ssl-cert
-
-# and rubygems
-cd /tmp
-wget http://production.cf.rubygems.org/rubygems/rubygems-1.3.7.tgz
-tar zxf rubygems-1.3.7.tgz
-cd rubygems-1.3.7
-sudo ruby setup.rb --no-format-executable
-
-# Install chef
-sudo gem install chef --no-rdoc --no-ri
-
-# Put SSL certificates in place
-scp admin@uganda.rapidftr.com:/home/admin/concatenated.dev.rapidftr.com.crt ~
-scp admin@uganda.rapidftr.com:/home/admin/dev.rapidftr.com.key ~
-
-# Write these config files:
-
-# /etc/chef/solo.rb
-file_cache_path "/tmp/chef-solo"
-cookbook_path "/tmp/chef-solo/cookbooks"
-json_attribs "/etc/chef/node.json"
-recipe_url "https://github.com/downloads/duelinmarkers/RapidFTR-chef-repo/chef-repo.tgz"
-# role_path "/var/chef-solo/roles"
-
-# /etc/chef/node.json
-{
-	"rapid_ftr":{
-		"ssl_certificate": "/home/rapidftr/concatenated.dev.rapidftr.com.crt",
-		"ssl_certificate_key": "/home/rapidftr/dev.rapidftr.com.key"
-	},
-	"passenger":{
-		"production":{
-			"bins_path": "/usr/bin"
-		}
-	},
-	"run_list": [
-		"recipe[build-essential::default]",
-		"recipe[passenger::daemon]",
-		"recipe[erlang::default]",
-		"recipe[couchdb::default]",
-		"recipe[git::default]",
-		"recipe[rapid_ftr::default]"]
-}
+	# Start with a plain Linux install
+	sudo apt-get update
+	# sudo apt-get upgrade # is that really needed? Shouldn't update be enough?
+	
+	# Install Ruby
+	sudo apt-get install ruby ruby-dev libopenssl-ruby rdoc ri irb build-essential wget ssl-cert
+	
+	# and rubygems
+	cd /tmp
+	wget http://production.cf.rubygems.org/rubygems/rubygems-1.3.7.tgz
+	tar zxf rubygems-1.3.7.tgz
+	cd rubygems-1.3.7
+	sudo ruby setup.rb --no-format-executable
+	
+	# Install chef
+	sudo gem install chef --no-rdoc --no-ri
+	
+	# Put SSL certificates in place
+	scp admin@uganda.rapidftr.com:/home/admin/concatenated.dev.rapidftr.com.crt ~
+	scp admin@uganda.rapidftr.com:/home/admin/dev.rapidftr.com.key ~
+	
+	# Write these config files:
+	
+	# /etc/chef/solo.rb
+	file_cache_path "/tmp/chef-solo"
+	cookbook_path "/tmp/chef-solo/cookbooks"
+	json_attribs "/etc/chef/node.json"
+	recipe_url "https://github.com/downloads/duelinmarkers/RapidFTR-chef-repo/chef-repo.tgz"
+	# role_path "/var/chef-solo/roles"
+	
+	# /etc/chef/node.json
+	{
+		"rapid_ftr":{
+			"ssl_certificate": "/home/rapidftr/concatenated.dev.rapidftr.com.crt",
+			"ssl_certificate_key": "/home/rapidftr/dev.rapidftr.com.key"
+			},
+			"passenger":{
+				"production":{
+					"bins_path": "/usr/bin"
+				}
+			},
+		"run_list": [
+			"recipe[build-essential::default]",
+			"recipe[passenger::daemon]",
+			"recipe[erlang::default]",
+			"recipe[couchdb::default]",
+			"recipe[git::default]",
+			"recipe[rapid_ftr::default]"]
+	}
 
 # run chef-solo
 
@@ -93,74 +101,3 @@ cd /srv/rapid_ftr/current
 script/console
 	then Child.reindex!
 
-
-
-Chef README boilerplate
-================
-
-Overview
-========
-
-Every Chef installation needs a Chef Repository. This is the place where cookbooks, roles, config files and other artifacts for managing systems with Chef will live. We strongly recommend storing this repository in a version control system such as Git and treat it like source code.
-
-While we prefer Git, and make this repository available via GitHub, you are welcome to download a tar or zip archive and use your favorite version control system to manage the code.
-
-Repository Directories
-======================
-
-This repository contains several directories, and each directory contains a README file that describes what it is for in greater detail, and how to use it for managing your systems with Chef.
-
-* `certificates/` - SSL certificates generated by `rake ssl_cert` live here.
-* `config/` - Contains the Rake configuration file, `rake.rb`.
-* `cookbooks/` - Cookbooks you download or create.
-* `data_bags/` - Store data bags and items in .json in the repository.
-* `roles/` - Store roles in .rb or .json in the repository.
-
-Rake Tasks
-==========
-
-The repository contains a `Rakefile` that includes tasks that are installed with the Chef libraries. To view the tasks available with in the repository with a brief description, run `rake -T`.
-
-The default task (`default`) is run when executing `rake` with no arguments. It will call the task `test_cookbooks`.
-
-The following tasks are not directly replaced by knife sub-commands.
-
-* `bundle_cookbook[cookbook]` - Creates cookbook tarballs in the `pkgs/` dir.
-* `install` - Calls `update`, `roles` and `upload_cookbooks` Rake tasks.
-* `ssl_cert` - Create self-signed SSL certificates in `certificates/` dir.
-* `update` - Update the repository from source control server, understands git and svn.
-
-The following tasks duplicate functionality from knife and may be removed in a future version of Chef.
-
-* `metadata` - replaced by `knife cookbook metadata -a`.
-* `new_cookbook` - replaced by `knife cookbook create`.
-* `role[role_name]` - replaced by `knife role from file`.
-* `roles` - iterates over the roles and uploads with `knife role from file`.
-* `test_cookbooks` - replaced by `knife cookbook test -a`.
-* `test_cookbook[cookbook]` - replaced by `knife cookbook test COOKBOOK`.
-* `upload_cookbooks` - replaced by `knife cookbook upload -a`.
-* `upload_cookbook[cookbook]` - replaced by `knife cookbook upload COOKBOOK`.
-
-Configuration
-=============
-
-The repository uses two configuration files.
-
-* config/rake.rb
-* .chef/knife.rb
-
-The first, `config/rake.rb` configures the Rakefile in two sections.
-
-* Constants used in the `ssl_cert` task for creating the certificates.
-* Constants that set the directory locations used in various tasks.
-
-If you use the `ssl_cert` task, change the values in the `config/rake.rb` file appropriately. These values were also used in the `new_cookbook` task, but that task is replaced by the `knife cookbook create` command which can be configured below.
-
-The second config file, `.chef/knife.rb` is a repository specific configuration file for knife. If you're using the Opscode Platform, you can download one for your organization from the management console. If you're using the Open Source Chef Server, you can generate a new one with `knife configure`. For more information about configuring Knife, see the Knife documentation.
-
-http://help.opscode.com/faqs/chefbasics/knife
-
-Next Steps
-==========
-
-Read the README file in each of the subdirectories for more information about what goes in those directories.
