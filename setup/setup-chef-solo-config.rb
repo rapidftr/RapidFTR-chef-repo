@@ -23,7 +23,7 @@ end
 
 puts "**************************************************************
 To generate chef-solo configuration, we need some information
-about SSH certificates. Please provide the locations where these
+about SSL certificates. Please provide the locations where these
 files can be found. It's ok if the files aren't there yet, just
 be sure to put them there before you run chef-solo.
 
