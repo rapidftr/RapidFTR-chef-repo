@@ -5,16 +5,25 @@ rescue LoadError
   raise
 end
 
+vagrant_dir = File.join(File.dirname(__FILE__), 'vagrant')
+
 desc "Deploy a fresh vagrant instance (destroying an existing instance)."
 task :deploy do
-  cd File.join(File.dirname(__FILE__), 'vagrant') do
+  cd vagrant_dir do
     sh 'vagrant destroy'
     sh 'vagrant up'
   end
 end
 
+desc "Re-provision running instance from local chef cookbooks."
+task :reprovision do
+  cd vagrant_dir do
+    sh 'vagrant provision'
+  end
+end
+
 task :setup_ssh do
-  cd File.join(File.dirname(__FILE__), 'vagrant') do
+  cd vagrant_dir do
     sh "vagrant ssh_config > vagrant.ssh.config"
     ENV['SSH_CONFIG'] = File.expand_path(
       File.dirname(__FILE__) + '/vagrant/vagrant.ssh.config')
