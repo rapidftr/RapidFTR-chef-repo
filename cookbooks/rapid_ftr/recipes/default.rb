@@ -17,7 +17,7 @@ cookbook_file "/etc/init.d/solr" do
   source "solr.init"
   owner "root"
   group "root"
-  mode "0744"
+  mode "0755"
 end
 
 service "solr" do
@@ -94,5 +94,6 @@ deploy_revision "/srv/rapid_ftr" do
     "log" => "log",
     "system/bb-builds/latest" => "public/blackberry",
     "config/initializers/hoptoad.rb" => "config/initializers/hoptoad.rb")
-  symlink_before_migrate nil # to skip database.yml
+  symlink_before_migrate({}) # to skip database.yml
+  notifies :restart, 'service[solr]'
 end
