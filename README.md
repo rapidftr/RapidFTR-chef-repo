@@ -67,12 +67,16 @@ To develop on the deployment platform:
 
 		bundle install
 
-*	Run the tests.
+* Add the vagrant box that we use as our VM base. There's more info about boxes on Vagrant's site (<http://vagrantup.com/docs/getting-started/boxes.html>).
+
+    vagrant box add lucid32 http://files.vagrantup.com/lucid32.box
+
+* Create the VM and run the tests against it.
 
     cd test
 		rake full
 
-	That will boot up a virtual machine running Ubuntu, "provision" the machine using the chef-repo rooted one directory up from the test directory (ie, using your working copy of the cookbooks), and run test/*_spec.rb.
+	That will boot up a virtual machine running Ubuntu, "provision" the machine using the chef-repo rooted one directory up from the test directory (ie, using your working copy of the cookbooks), and run test/*_spec.rb. This can take a while, but may need some input to approve network access the first-time, depending on your firewall setup. 
 
 *	Run just:
 
