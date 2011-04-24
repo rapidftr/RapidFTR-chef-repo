@@ -4,6 +4,8 @@
 
 source :rubygems
 
+gem "chef"
+
 group :test do
   gem "rspec-core"
   gem "rspec-expectations"
