@@ -50,24 +50,26 @@ You should be all set. Open your browser to https://YOURSERVER/ and login with u
 
 ## Contributing ##
 
+We use bundler and rvm to control the ruby environment we are developing in. These instructions will assume that you have already installed rvm (<https://rvm.beginrescueend.com/rvm/install/>).
+
 To develop on the deployment platform:
 
 *	Clone this repository.
 
-*	Install Vagrant (<http://vagrantup.com/>).
+    git clone https://github.com/duelinmarkers/RapidFTR-chef-repo.git
 
-		gem install vagrant
+* Set up the rvm gemset we expect, and cd in to your clone. You should see a message from rvm prompting you to accept our ruby interpreter version and gemset.
 
-*	Install at the least the core and expectations gems from Rspec-2.
+    rvm gemset create RapidFTR-chef-repo
+    cd RapidFTR-chef-repo
 
-		gem install rspec-core rspec-expectations
+*	Run bundler. (rvm adds the bundler gem to gemsets by default, so you should have it already.)
 
-	You can also install all of rspec-2.
+		bundle install
 
-		gem install rspec
+*	Run the tests.
 
-*	From the test directory, run
-
+    cd test
 		rake full
 
 	That will boot up a virtual machine running Ubuntu, "provision" the machine using the chef-repo rooted one directory up from the test directory (ie, using your working copy of the cookbooks), and run test/*_spec.rb.
