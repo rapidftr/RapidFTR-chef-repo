@@ -56,12 +56,12 @@ To develop on the deployment platform:
 
 *	Clone this repository.
 
-    git clone https://github.com/duelinmarkers/RapidFTR-chef-repo.git
+		git clone https://github.com/duelinmarkers/RapidFTR-chef-repo.git
 
 * Set up the rvm gemset we expect, and cd in to your clone. You should see a message from rvm prompting you to accept our ruby interpreter version and gemset.
 
-    rvm gemset create RapidFTR-chef-repo
-    cd RapidFTR-chef-repo
+		rvm gemset create RapidFTR-chef-repo
+		cd RapidFTR-chef-repo
 
 *	Run bundler. (rvm adds the bundler gem to gemsets by default, so you should have it already.)
 
@@ -69,11 +69,11 @@ To develop on the deployment platform:
 
 * Add the vagrant box that we use as our VM base. There's more info about boxes on Vagrant's site (<http://vagrantup.com/docs/getting-started/boxes.html>).
 
-    vagrant box add lucid32 http://files.vagrantup.com/lucid32.box
+		vagrant box add lucid32 http://files.vagrantup.com/lucid32.box
 
 * Create the VM and run the tests against it.
 
-    cd test
+		cd test
 		rake full
 
 	That will boot up a virtual machine running Ubuntu, "provision" the machine using the chef-repo rooted one directory up from the test directory (ie, using your working copy of the cookbooks), and run test/*_spec.rb. This can take a while, but may need some input to approve network access the first-time, depending on your firewall setup. 
