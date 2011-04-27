@@ -42,7 +42,6 @@ Start with a publicly accessible server (or one that will be made publicly acces
 *	Now run chef-solo to install the application and its dependencies.
 
 		sudo chef-solo # This will take an uncomfortably long time (ie, more than 10 minutes).
-		sudo /etc/init.d/solr start # This is necessary due to a bug. You could also just reboot.
 		cd /srv/rapid_ftr/current
 		sudo rake couchdb:create db:seed RAILS_ENV=production
 
