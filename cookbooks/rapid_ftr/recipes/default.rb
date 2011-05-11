@@ -96,4 +96,14 @@ deploy_revision "/srv/rapid_ftr" do
     "config/initializers/hoptoad.rb" => "config/initializers/hoptoad.rb")
   symlink_before_migrate({}) # to skip database.yml
   notifies :restart, 'service[solr]'
+
+  before_restart do
+    directory "/srv/rapid_ftr/shared/log" do
+      owner "nobody"
+      group "admin"
+      mode "0755"
+      recursive true
+      action :create
+    end
+  end
 end

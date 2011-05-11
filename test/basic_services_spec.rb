@@ -14,6 +14,13 @@ describe "Basic Services:" do
     end
   end
 
+  describe "Rails" do
+    it "should write logs to production.log" do
+      logs_written = check_for_file "/srv/rapid_ftr/shared/log/production.log"
+      logs_written.should be_true
+    end
+  end
+
   describe "Solr" do
     it "should be responding" do
       response_from(:http, 8902, '/solr/')['body'].should include(
@@ -48,5 +55,10 @@ describe "Basic Services:" do
     output = `ssh -q -F #{ENV['SSH_CONFIG']} vagrant "ruby -e \\"#{remote_ruby}\\""`
     raise "Request failed to #{url}.\nOutput: #{output}" unless $?.exitstatus == 0
     eval output
+  end
+
+  def check_for_file file_path
+    output = `ssh -q -F #{ENV['SSH_CONFIG']} vagrant "[ -f #{file_path} ]"`
+    $?.exitstatus == 0
   end
 end
