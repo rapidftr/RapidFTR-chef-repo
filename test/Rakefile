@@ -41,3 +41,28 @@ task :default => 'system_spec'
 
 desc "Deploy fresh instance and run system specs."
 task :full => %w( deploy system_spec )
+
+namespace :ec2 do
+  require 'AWS'
+  task :manage_instance do
+    ec2 = AWS::EC2::Base.new(
+      :access_key_id => ENV['AMAZON_ACCESS_KEY_ID'],
+      :secret_access_key => ENV['AMAZON_SECRET_ACCESS_KEY'])
+    ami = "ami-7000f019" # Ubuntu 10.04 LTS Lucid instance-store from http://alestic.com/
+    r = ec2.run_instances(
+      :image_id => ami,
+      :disable_api_termination => false,
+      :instance_type => "c1.medium")
+    instance_id = r.instancesSet.item.first.instanceId
+    instance = nil
+    begin
+      puts "Waiting for instance #{instance_id} to be running."
+      sleep 8
+      description = ec2.describe_instances(:instance_id => instance_id)
+      instance = description.reservationSet.item[0].instancesSet.item[0]
+      puts "Instance is #{instance.instanceState.name}"
+    end while instance.instanceState.name != "running"
+    puts "Terminating."
+    ec2.terminate_instances :instance_id => [instance_id]
+  end
+end

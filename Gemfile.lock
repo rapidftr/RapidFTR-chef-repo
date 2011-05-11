@@ -2,6 +2,8 @@ GEM
   remote: http://rubygems.org/
   specs:
     abstract (1.0.0)
+    amazon-ec2 (0.9.17)
+      xml-simple (>= 1.0.12)
     archive-tar-minitar (0.5.2)
     bunny (0.6.0)
     chef (0.8.10)
@@ -57,12 +59,14 @@ GEM
       virtualbox (~> 0.8.3)
     virtualbox (0.8.3)
       ffi (~> 0.6.3)
+    xml-simple (1.0.15)
     yajl-ruby (0.8.2)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  amazon-ec2
   chef
   rspec-core
   rspec-expectations

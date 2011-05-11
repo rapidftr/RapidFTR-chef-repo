@@ -10,4 +10,5 @@ group :test do
   gem "rspec-core"
   gem "rspec-expectations"
   gem "vagrant"
+  gem "amazon-ec2"
 end
