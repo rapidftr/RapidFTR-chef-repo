@@ -52,13 +52,13 @@ describe "Basic Services:" do
         exit 1
       end
     EOF
-    output = `ssh -q -F #{ENV['SSH_CONFIG']} vagrant "ruby -e \\"#{remote_ruby}\\""`
+    output = `ssh -q #{ENV['SSH_OPTIONS']} #{ENV['SSH_HOST']} "ruby -e \\"#{remote_ruby}\\""`
     raise "Request failed to #{url}.\nOutput: #{output}" unless $?.exitstatus == 0
     eval output
   end
 
   def check_for_file file_path
-    output = `ssh -q -F #{ENV['SSH_CONFIG']} vagrant "[ -f #{file_path} ]"`
+    output = `ssh -q #{ENV['SSH_OPTIONS']} #{ENV['SSH_HOST']} "[ -f #{file_path} ]"`
     $?.exitstatus == 0
   end
 end
