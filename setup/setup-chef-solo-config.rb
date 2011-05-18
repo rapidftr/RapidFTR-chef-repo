@@ -4,6 +4,15 @@ require 'fileutils'
 require 'erb'
 require 'readline'
 
+def get env_var, prompt
+  if ENV[env_var]
+    puts "Using #{env_var} #{ENV[env_var]}"
+    ENV[env_var]
+  else
+    Readline.readline prompt
+  end
+end
+
 repo_root = File.expand_path(File.dirname(__FILE__) + '/..')
 solo_config = "/etc/chef/solo.rb"
 node_attribute_file = '/etc/chef/node.json'
@@ -22,6 +31,7 @@ role_path "#{repo_root}/roles"
 end
 
 puts "
+
 **************************************************************
 To generate chef-solo configuration, we need some information.
 
@@ -30,8 +40,8 @@ where these files can be found. It's ok if the files aren't there yet,
 just be sure to put them there before you run chef-solo.
 "
 
-ssl_crt = Readline.readline("Enter the location of your certificate file (often ends in '.crt'):")
-ssl_key = Readline.readline("Enter the location of your certificate key file (often ends in '.key'):")
+ssl_crt = File.expand_path get('SSL_CRT', "Enter the location of your certificate file (often ends in '.crt'):")
+ssl_key = File.expand_path get('SSL_KEY', "Enter the location of your certificate key file (often ends in '.key'):")
 
 puts "
 
@@ -43,7 +53,7 @@ will probably guess
 If that's what you want, you can just hit enter.
 "
 
-fqdn = Readline.readline("Enter the publicly accessible domain name of your server:")
+fqdn = get 'FQDN', "Enter the publicly accessible domain name of your server:"
 
 puts "
 

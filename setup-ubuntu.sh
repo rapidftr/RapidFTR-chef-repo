@@ -8,10 +8,10 @@ CHEF_REPO_ROOT=`pwd`
 cd $INITIAL_DIR
 
 echo "Updating apt package index..."
-sudo apt-get update
+sudo apt-get --yes update
 
 echo "Installing chef's required apt packages..."
-sudo apt-get install ruby ruby-dev libopenssl-ruby rdoc ri irb build-essential wget ssl-cert
+sudo apt-get --yes install ruby ruby-dev libopenssl-ruby rdoc ri irb build-essential wget ssl-cert
 
 echo "Installing rubygems $RUBYGEMS_VERSION from source..."
 cd /tmp
@@ -24,4 +24,4 @@ echo "Installing chef..."
 sudo gem install chef --no-rdoc --no-ri
 
 echo "Setting up chef-solo..."
-sudo ruby $CHEF_REPO_ROOT/setup/setup-chef-solo-config.rb
+sudo env SSL_CRT=$SSL_CRT SSL_KEY=$SSL_KEY FQDN=$FQDN ruby $CHEF_REPO_ROOT/setup/setup-chef-solo-config.rb

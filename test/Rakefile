@@ -53,7 +53,7 @@ namespace :ec2 do
       sh %(scp #{ENV['SSH_OPTIONS']} vagrant/localhost.rapidftr.test.crt #{ENV['SSH_HOST']}:)
       sh %(scp #{ENV['SSH_OPTIONS']} vagrant/localhost.rapidftr.test.key #{ENV['SSH_HOST']}:)
       sh %(ssh #{ENV['SSH_OPTIONS']} #{ENV['SSH_HOST']} "tar xzf RapidFTR-chef-repo-test.tgz")
-      sh %(ssh #{ENV['SSH_OPTIONS']} #{ENV['SSH_HOST']} "export SSL_CRT=~/localhost.rapidftr.test.crt && export SSL_KEY=~/localhost.rapidftr.test.key && export FQDN=#{instance.dnsName} && cd chef-repo/ && sudo ./setup-ubuntu.sh")
+      sh %(ssh #{ENV['SSH_OPTIONS']} #{ENV['SSH_HOST']} "cd chef-repo/ && sudo env SSL_CRT=/home/ubuntu/localhost.rapidftr.test.crt SSL_KEY=/home/ubuntu/localhost.rapidftr.test.key FQDN=#{instance.dnsName} ./setup-ubuntu.sh")
       sh %(ssh #{ENV['SSH_OPTIONS']} #{ENV['SSH_HOST']} "sudo chef-solo")
       Rake::Task['system_spec'].invoke
     end
@@ -98,7 +98,7 @@ def with_ec2_instance
   yield instance
 
 ensure
+  # puts "Going to terminate instance #{instance_id}."; pry
   puts "Terminating instance #{instance_id}."
-  pry
   ec2.terminate_instances :instance_id => [instance_id]
 end
