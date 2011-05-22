@@ -48,7 +48,7 @@ namespace :ec2 do
     require 'pry'
     with_ec2_instance do |instance|
       sh %(tar czf ../../RapidFTR-chef-repo-test.tgz --directory ../.. chef-repo)
-      puts "sleeping 5"; sleep 5
+      wait 5, "because otherwise sometimes we can't ssh in just yet"
       sh %(scp #{ENV['SSH_OPTIONS']} ../../RapidFTR-chef-repo-test.tgz #{ENV['SSH_HOST']}:)
       sh %(scp #{ENV['SSH_OPTIONS']} vagrant/localhost.rapidftr.test.crt #{ENV['SSH_HOST']}:)
       sh %(scp #{ENV['SSH_OPTIONS']} vagrant/localhost.rapidftr.test.key #{ENV['SSH_HOST']}:)
@@ -73,14 +73,29 @@ def with_ec2_instance
     :key_name => File.basename(ENV['RAPID_FTR_IDENTITY_FILE'], '.pem'))
   instance_id = r.instancesSet.item.first.instanceId
   instance = nil
-  begin
-    puts "Waiting for instance #{instance_id} to be running."
-    sleep 8
+  attempts = 0
+  wait 20, "for launch of instance #{instance_id}"
+  loop do
     description = ec2.describe_instances(:instance_id => instance_id)
     instance = description.reservationSet.item[0].instancesSet.item[0]
     puts "Instance is #{instance.instanceState.name}"
-  end while instance.instanceState.name != "running"
+    break if instance.instanceState.name == "running"
+    attempts += 1
+    raise "Instance still not running after #{attempts} checks!" if attempts > 20
+    wait 8, "for instance #{instance_id} to be running"
+  end
 
+  setup_ec2_ssh instance
+
+  yield instance
+
+ensure
+  # puts "Going to terminate instance #{instance_id}."; pry
+  puts "Terminating instance #{instance_id}."
+  ec2.terminate_instances :instance_id => [instance_id]
+end
+
+def setup_ec2_ssh instance
   File.open('aws.ssh.config', 'w') do |file|
     file.write "Host ec2
       HostName #{instance.dnsName}
@@ -94,11 +109,9 @@ def with_ec2_instance
   end
   ENV['SSH_OPTIONS'] = "-F #{File.expand_path('aws.ssh.config')}"
   ENV['SSH_HOST'] = "ec2"
+end
 
-  yield instance
-
-ensure
-  # puts "Going to terminate instance #{instance_id}."; pry
-  puts "Terminating instance #{instance_id}."
-  ec2.terminate_instances :instance_id => [instance_id]
+def wait seconds, reason
+  puts "Waiting #{seconds} seconds #{reason}"
+  sleep seconds
 end
