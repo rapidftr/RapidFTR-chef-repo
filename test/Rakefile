@@ -89,10 +89,17 @@ def with_ec2_instance
 
   yield instance
 
+rescue Exception => e
+  $stderr.puts e
+  raise
 ensure
   # puts "Going to terminate instance #{instance_id}."; pry
-  puts "Terminating instance #{instance_id}."
-  ec2.terminate_instances :instance_id => [instance_id]
+  if ec2
+    puts "Terminating instance #{instance_id}."
+    ec2.terminate_instances :instance_id => [instance_id]
+  else
+    puts "EC2 not set up. HOPEFULLY no instance was launched!"
+  end
 end
 
 def setup_ec2_ssh instance
