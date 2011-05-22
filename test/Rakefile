@@ -63,7 +63,7 @@ end
 def with_ec2_instance
   ec2 = AWS::EC2::Base.new(
     :access_key_id => ENV['AMAZON_ACCESS_KEY_ID'],
-    :secret_access_key => ENV['AMAZON_SECRET_ACCESS_KEY'])
+    :secret_access_key => ENV['AMAZON_SECRET_ACCESS_KEY'] || `cat #{ENV['AMAZON_SECRET_ACCESS_KEY_FILE']}`)
   ami = "ami-7000f019" # Ubuntu 10.04 LTS Lucid instance-store from http://alestic.com/
   puts "Launching instance with AMI #{ami}"
   r = ec2.run_instances(
