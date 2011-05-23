@@ -43,9 +43,10 @@ desc "Deploy fresh instance and run system specs."
 task :full => %w( deploy system_spec )
 
 namespace :ec2 do
+  require 'AWS'
+  require 'pry'
+
   task :full do
-    require 'AWS'
-    require 'pry'
     with_ec2_instance do |instance|
       sh %(tar czf ../../RapidFTR-chef-repo-test.tgz --directory ../.. chef-repo)
       wait 5, "because otherwise sometimes we can't ssh in just yet"
@@ -58,19 +59,26 @@ namespace :ec2 do
       Rake::Task['system_spec'].invoke
     end
   end
+
+  task :up_and_down do
+    with_ec2_instance do |instance|
+      puts "Instance up."
+      binding.pry
+    end
+  end
 end
 
 def with_ec2_instance
-  ec2 = AWS::EC2::Base.new(
-    :access_key_id => ENV['AMAZON_ACCESS_KEY_ID'],
-    :secret_access_key => ENV['AMAZON_SECRET_ACCESS_KEY'] || `cat #{ENV['AMAZON_SECRET_ACCESS_KEY_FILE']}`)
+  key_id, key, id_file = ec2_auth_stuff
+  puts key_id, key, id_file
+  ec2 = AWS::EC2::Base.new(:access_key_id => key_id, :secret_access_key => key)
   ami = "ami-7000f019" # Ubuntu 10.04 LTS Lucid instance-store from http://alestic.com/
   puts "Launching instance with AMI #{ami}"
   r = ec2.run_instances(
     :image_id => ami,
     :disable_api_termination => false,
     :instance_type => "c1.medium",
-    :key_name => File.basename(ENV['RAPID_FTR_IDENTITY_FILE'], '.pem'))
+    :key_name => File.basename(id_file, '.pem'))
   instance_id = r.instancesSet.item.first.instanceId
   instance = nil
   attempts = 0
@@ -85,7 +93,7 @@ def with_ec2_instance
     wait 8, "for instance #{instance_id} to be running"
   end
 
-  setup_ec2_ssh instance
+  setup_ec2_ssh instance, id_file
 
   yield instance
 
@@ -102,7 +110,16 @@ ensure
   end
 end
 
-def setup_ec2_ssh instance
+def ec2_auth_stuff
+  key_id = ENV['AMAZON_ACCESS_KEY_ID']
+  key = ENV['AMAZON_SECRET_ACCESS_KEY'] ||
+    (ENV['AMAZON_SECRET_ACCESS_KEY_FILE'] && `cat #{ENV['AMAZON_SECRET_ACCESS_KEY_FILE']}`.chomp) ||
+    raise("AMAZON_SECRET_ACCESS_KEY or AMAZON_SECRET_ACCESS_KEY_FILE is required")
+  id_file = ENV['RAPID_FTR_IDENTITY_FILE']
+  [key_id, key, id_file]
+end
+
+def setup_ec2_ssh instance, id_file
   File.open('aws.ssh.config', 'w') do |file|
     file.write "Host ec2
       HostName #{instance.dnsName}
@@ -110,7 +127,7 @@ def setup_ec2_ssh instance
       UserKnownHostsFile /dev/null
       StrictHostKeyChecking no
       PasswordAuthentication no
-      IdentityFile #{File.expand_path(ENV['RAPID_FTR_IDENTITY_FILE'])}
+      IdentityFile #{File.expand_path(id_file)}
       IdentitiesOnly yes"
     file.puts
   end
