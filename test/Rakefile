@@ -34,13 +34,12 @@ RSpec::Core::RakeTask.new('system_spec') do |t|
   t.rspec_opts = ["--color", "--format documentation", "--require ./spec_helper.rb"]
   t.pattern = '*_spec.rb'
 end
-task 'system_spec' => 'setup_ssh'
 
 desc "Run system specs on an existing instance."
-task :default => 'system_spec'
+task :default => %w( setup_ssh system_spec )
 
 desc "Deploy fresh instance and run system specs."
-task :full => %w( deploy system_spec )
+task :full => %w( deploy setup_ssh system_spec )
 
 task :create_archive do
   cd '..' do
