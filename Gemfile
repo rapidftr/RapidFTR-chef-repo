@@ -9,6 +9,7 @@ gem "chef"
 group :test do
   gem "rspec-core"
   gem "rspec-expectations"
+  gem "rspec-mocks" # temporarily to get TeamCity passing -- don't know why it's requiring it.
   gem "vagrant"
   gem "amazon-ec2"
   gem "pry"

@@ -53,6 +53,7 @@ GEM
     rspec-core (2.5.1)
     rspec-expectations (2.5.0)
       diff-lcs (~> 1.1.2)
+    rspec-mocks (2.6.0)
     ruby_parser (2.0.6)
       sexp_processor (~> 3.0)
     sexp_processor (3.0.5)
@@ -83,4 +84,5 @@ DEPENDENCIES
   pry
   rspec-core
   rspec-expectations
+  rspec-mocks
   vagrant
