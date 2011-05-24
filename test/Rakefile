@@ -42,18 +42,24 @@ task :default => 'system_spec'
 desc "Deploy fresh instance and run system specs."
 task :full => %w( deploy system_spec )
 
+task :create_archive do
+  cd '..' do
+    sh %(tar czf ../RapidFTR-chef-repo-test.tgz *)
+  end
+end
+
 namespace :ec2 do
   require 'AWS'
   require 'pry'
 
-  task :full do
+  task :full => :create_archive do
     with_ec2_instance do |instance|
-      sh %(tar czf ../../RapidFTR-chef-repo-test.tgz --directory ../.. chef-repo)
       wait 5, "because otherwise sometimes we can't ssh in just yet"
       sh %(scp #{ENV['SSH_OPTIONS']} ../../RapidFTR-chef-repo-test.tgz #{ENV['SSH_HOST']}:)
       sh %(scp #{ENV['SSH_OPTIONS']} vagrant/localhost.rapidftr.test.crt #{ENV['SSH_HOST']}:)
       sh %(scp #{ENV['SSH_OPTIONS']} vagrant/localhost.rapidftr.test.key #{ENV['SSH_HOST']}:)
-      sh %(ssh #{ENV['SSH_OPTIONS']} #{ENV['SSH_HOST']} "tar xzf RapidFTR-chef-repo-test.tgz")
+      sh %(ssh #{ENV['SSH_OPTIONS']} #{ENV['SSH_HOST']} "mkdir chef-repo")
+      sh %(ssh #{ENV['SSH_OPTIONS']} #{ENV['SSH_HOST']} "tar xzf RapidFTR-chef-repo-test.tgz --directory chef-repo")
       sh %(ssh #{ENV['SSH_OPTIONS']} #{ENV['SSH_HOST']} "cd chef-repo/ && sudo env SSL_CRT=/home/ubuntu/localhost.rapidftr.test.crt SSL_KEY=/home/ubuntu/localhost.rapidftr.test.key FQDN=#{instance.dnsName} ./setup-ubuntu.sh")
       sh %(ssh #{ENV['SSH_OPTIONS']} #{ENV['SSH_HOST']} "sudo chef-solo")
       Rake::Task['system_spec'].invoke
@@ -82,7 +88,7 @@ def with_ec2_instance
   instance_id = r.instancesSet.item.first.instanceId
   instance = nil
   attempts = 0
-  wait 20, "for launch of instance #{instance_id}"
+  wait 30, "for launch of instance #{instance_id}"
   loop do
     description = ec2.describe_instances(:instance_id => instance_id)
     instance = description.reservationSet.item[0].instancesSet.item[0]
