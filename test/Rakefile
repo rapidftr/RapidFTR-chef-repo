@@ -1,7 +1,7 @@
 begin
   require 'rspec/core/rake_task'
 rescue LoadError
-  puts "\nRspec 2 is required. Try this: \n\t`gem install rspec-core rspec-expectations`.\n\n"
+  puts "\nRspec 2 is required.\nMaybe you need a bundle install."
   raise
 end
 
@@ -53,7 +53,7 @@ namespace :ec2 do
 
   task :full => :create_archive do
     with_ec2_instance do |instance|
-      wait 5, "because otherwise sometimes we can't ssh in just yet"
+      wait 10, "because otherwise sometimes we can't ssh in just yet"
       sh %(scp #{ENV['SSH_OPTIONS']} ../../RapidFTR-chef-repo-test.tgz #{ENV['SSH_HOST']}:)
       sh %(scp #{ENV['SSH_OPTIONS']} vagrant/localhost.rapidftr.test.crt #{ENV['SSH_HOST']}:)
       sh %(scp #{ENV['SSH_OPTIONS']} vagrant/localhost.rapidftr.test.key #{ENV['SSH_HOST']}:)
@@ -62,6 +62,7 @@ namespace :ec2 do
       sh %(ssh #{ENV['SSH_OPTIONS']} #{ENV['SSH_HOST']} "cd chef-repo/ && sudo env SSL_CRT=/home/ubuntu/localhost.rapidftr.test.crt SSL_KEY=/home/ubuntu/localhost.rapidftr.test.key FQDN=#{instance.dnsName} ./setup-ubuntu.sh")
       sh %(ssh #{ENV['SSH_OPTIONS']} #{ENV['SSH_HOST']} "sudo chef-solo")
       Rake::Task['system_spec'].invoke
+      binding.pry if ENV['INTERACTIVE'] == 'true'
     end
   end
 
@@ -105,7 +106,10 @@ rescue Exception => e
   $stderr.puts e
   raise
 ensure
-  # puts "Going to terminate instance #{instance_id}."; pry
+  if ENV['INTERACTIVE'] == 'true'
+    puts "Going to terminate instance #{instance_id}."
+    binding.pry
+  end
   if ec2
     puts "Terminating instance #{instance_id}."
     ec2.terminate_instances :instance_id => [instance_id]
