@@ -58,7 +58,9 @@ namespace :ec2 do
   task :full => :create_archive do
     with_ec2_instance do |instance|
       wait 10, "because otherwise sometimes we can't ssh in just yet"
-      sh %(scp #{ENV['SSH_OPTIONS']} ../../RapidFTR-chef-repo-test.tgz #{ENV['SSH_HOST']}:)
+      retrying 3 do
+        sh %(scp #{ENV['SSH_OPTIONS']} ../../RapidFTR-chef-repo-test.tgz #{ENV['SSH_HOST']}:)
+      end
       sh %(scp #{ENV['SSH_OPTIONS']} vagrant/localhost.rapidftr.test.crt #{ENV['SSH_HOST']}:)
       sh %(scp #{ENV['SSH_OPTIONS']} vagrant/localhost.rapidftr.test.key #{ENV['SSH_HOST']}:)
       sh %(ssh #{ENV['SSH_OPTIONS']} #{ENV['SSH_HOST']} "mkdir chef-repo")
@@ -152,6 +154,20 @@ end
 def wait seconds, reason
   puts "Waiting #{seconds} seconds #{reason}"
   sleep seconds
+end
+
+def retrying times
+  tries = 0
+  begin
+    tries += 1
+    yield
+  rescue
+    if tries <= times
+      wait 2, "to retry"
+      retry
+    end
+    raise
+  end
 end
 
 def interactive?
