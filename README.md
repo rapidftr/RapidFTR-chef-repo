@@ -72,24 +72,31 @@ To develop on the deployment platform:
 
 * Create the VM and run the tests against it.
 
-		cd test
-		rake full
+		rake vagrant:full
 
 	That will boot up a virtual machine running Ubuntu, "provision" the machine using the chef-repo rooted one directory up from the test directory (ie, using your working copy of the cookbooks), and run test/*_spec.rb. This can take a while, but may need some input to approve network access the first-time, depending on your firewall setup. 
 
-*	Run just:
+*	Run:
 
-		rake
+		rake vagrant:setup\_ssh system\_spec
 
 	to re-run the tests if you've made manual changes in the tests or the server.
 
 *	Run
 
-		rake reprovision
+		rake vagrant:reprovision
 
 	to re-run your local cookbooks on the running VM. (Note that won't start from a clean state, but since starting from a clean state takes a long time it might be worthwhile for faster feedback.)
 
 The (very slim) spec suite that lives in the test directory is ultimately intended to be runnable against a fresh production deployment and provide a "smoke test." For now it only works locally against the Vagrant VM.
+
+## Testing on EC2 ##
+
+For a more realistic test, you can use Amazon EC2. Set up the following environment variables:
+
+*	AMAZON\_ACCESS\_KEY\_ID
+*	AMAZON\_SECRET\_ACCESS\_KEY
+*	RAPID\_FTR\_IDENTITY\_FILE
 
 ## Why Chef Solo? ##
 
