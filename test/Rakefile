@@ -5,41 +5,44 @@ rescue LoadError
   raise
 end
 
-vagrant_dir = File.join(File.dirname(__FILE__), 'vagrant')
+desc "Run system specs on an existing instance."
+task :default => %w( vagrant:setup_ssh system_spec )
 
-desc "Deploy a fresh vagrant instance (destroying an existing instance)."
-task :deploy do
-  cd vagrant_dir do
-    sh 'vagrant destroy'
-    sh 'vagrant up'
+namespace :vagrant do
+  vagrant_dir = File.join(File.dirname(__FILE__), 'vagrant')
+
+  desc "Deploy fresh instance and run system specs."
+  task :full => %w( vagrant:deploy vagrant:setup_ssh system_spec )
+
+  desc "Deploy a fresh vagrant instance (destroying an existing instance)."
+  task :deploy do
+    cd vagrant_dir do
+      sh 'vagrant destroy'
+      sh 'vagrant up'
+    end
+  end
+
+  desc "Re-provision running instance from local chef cookbooks."
+  task :reprovision do
+    cd vagrant_dir do
+      sh 'vagrant provision'
+    end
+  end
+
+  task :setup_ssh do
+    cd vagrant_dir do
+      sh "vagrant ssh_config > vagrant.ssh.config"
+      ENV['SSH_OPTIONS'] = "-F #{File.expand_path('vagrant.ssh.config')}"
+      ENV['SSH_HOST'] = "vagrant"
+    end
   end
 end
 
-desc "Re-provision running instance from local chef cookbooks."
-task :reprovision do
-  cd vagrant_dir do
-    sh 'vagrant provision'
-  end
-end
-
-task :setup_ssh do
-  cd vagrant_dir do
-    sh "vagrant ssh_config > vagrant.ssh.config"
-    ENV['SSH_OPTIONS'] = "-F #{File.expand_path('vagrant.ssh.config')}"
-    ENV['SSH_HOST'] = "vagrant"
-  end
-end
-
+desc "Run specs to check the health of a system. No dependencies defined here because you might want vagrant, EC2, or some other instance pointed to by SSH_OPTIONS and SSH_HOST."
 RSpec::Core::RakeTask.new('system_spec') do |t|
   t.rspec_opts = ["--color", "--format documentation", "--require ./spec_helper.rb"]
   t.pattern = '*_spec.rb'
 end
-
-desc "Run system specs on an existing instance."
-task :default => %w( setup_ssh system_spec )
-
-desc "Deploy fresh instance and run system specs."
-task :full => %w( deploy setup_ssh system_spec )
 
 task :create_archive do
   cd '..' do
@@ -51,6 +54,7 @@ namespace :ec2 do
   require 'AWS'
   require 'pry'
 
+  desc "Provision a fresh instance, deploy, run system specs, and terminate. Set INTERACTIVE=true to play with the instance before termination."
   task :full => :create_archive do
     with_ec2_instance do |instance|
       wait 10, "because otherwise sometimes we can't ssh in just yet"
@@ -62,11 +66,13 @@ namespace :ec2 do
       sh %(ssh #{ENV['SSH_OPTIONS']} #{ENV['SSH_HOST']} "cd chef-repo/ && sudo env SSL_CRT=/home/ubuntu/localhost.rapidftr.test.crt SSL_KEY=/home/ubuntu/localhost.rapidftr.test.key FQDN=#{instance.dnsName} ./setup-ubuntu.sh")
       sh %(ssh #{ENV['SSH_OPTIONS']} #{ENV['SSH_HOST']} "sudo chef-solo")
       Rake::Task['system_spec'].invoke
-      binding.pry if ENV['INTERACTIVE'] == 'true'
+      binding.pry if interactive?
     end
   end
 
+  desc "Provision a fresh instance and get interactive with it."
   task :up_and_down do
+    raise "INTERACTIVE is not 'true'! That's all this task is for." unless interactive?
     with_ec2_instance do |instance|
       puts "Instance up."
       binding.pry
@@ -106,7 +112,7 @@ rescue Exception => e
   $stderr.puts e
   raise
 ensure
-  if ENV['INTERACTIVE'] == 'true'
+  if interactive?
     puts "Going to terminate instance #{instance_id}."
     binding.pry
   end
@@ -146,4 +152,8 @@ end
 def wait seconds, reason
   puts "Waiting #{seconds} seconds #{reason}"
   sleep seconds
+end
+
+def interactive?
+  ENV['INTERACTIVE'] == 'true'
 end
