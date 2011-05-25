@@ -82,7 +82,7 @@ def with_ec2_instance
   r = ec2.run_instances(
     :image_id => ami,
     :disable_api_termination => false,
-    :instance_type => "c1.medium",
+    :instance_type => ENV['EC2_INSTANCE_TYPE'] || "c1.medium",
     :key_name => File.basename(id_file, '.pem'))
   instance_id = r.instancesSet.item.first.instanceId
   instance = nil
