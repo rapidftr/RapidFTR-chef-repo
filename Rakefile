@@ -89,13 +89,13 @@ end
 
 def with_ec2_instance
   key_id, key, id_file = ec2_auth_stuff
+  instance_type, ami, ssh_user = ec2_instance_stuff
   ec2 = AWS::EC2::Base.new(:access_key_id => key_id, :secret_access_key => key)
-  ami = ENV['EC2_AMI'] || "ami-7000f019" # Ubuntu 10.04 LTS Lucid instance-store from http://alestic.com/
-  puts "Launching instance with AMI #{ami}"
+  puts "Launching #{instance_type} instance with AMI #{ami}"
   r = ec2.run_instances(
     :image_id => ami,
     :disable_api_termination => false,
-    :instance_type => ENV['EC2_INSTANCE_TYPE'] || "c1.medium",
+    :instance_type => instance_type,
     :key_name => File.basename(id_file, '.pem'))
   instance_id = r.instancesSet.item.first.instanceId
   instance = nil
@@ -111,7 +111,7 @@ def with_ec2_instance
     wait 8, "for instance #{instance_id} to be running"
   end
 
-  setup_ec2_ssh instance, id_file
+  setup_ec2_ssh instance, id_file, ssh_user
 
   yield instance
 
@@ -140,11 +140,18 @@ def ec2_auth_stuff
   [key_id, key, id_file]
 end
 
-def setup_ec2_ssh instance, id_file
+def ec2_instance_stuff
+  instance_type = ENV['EC2_INSTANCE_TYPE'] || 'c1.medium'
+  ami = ENV['EC2_AMI'] || 'ami-7000f019' # Ubuntu 10.04 LTS Lucid instance-store from http://alestic.com/
+  ssh_user = ENV['EC2_AMI_DEFAULT_USER'] || 'ubuntu'
+  [instance_type, ami, ssh_user]
+end
+
+def setup_ec2_ssh instance, id_file, ssh_user
   File.open('test/aws.ssh.config', 'w') do |file|
     file.write "Host ec2
       HostName #{instance.dnsName}
-      User ubuntu
+      User #{ssh_user}
       UserKnownHostsFile /dev/null
       StrictHostKeyChecking no
       PasswordAuthentication no
