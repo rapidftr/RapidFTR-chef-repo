@@ -90,7 +90,7 @@ end
 def with_ec2_instance
   key_id, key, id_file = ec2_auth_stuff
   ec2 = AWS::EC2::Base.new(:access_key_id => key_id, :secret_access_key => key)
-  ami = "ami-7000f019" # Ubuntu 10.04 LTS Lucid instance-store from http://alestic.com/
+  ami = ENV['EC2_AMI'] || "ami-7000f019" # Ubuntu 10.04 LTS Lucid instance-store from http://alestic.com/
   puts "Launching instance with AMI #{ami}"
   r = ec2.run_instances(
     :image_id => ami,
