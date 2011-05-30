@@ -111,8 +111,9 @@ namespace :ec2 do
       if ENV['AMI_NAME']
         Rake::Task["ec2:ami:#{ENV['AMI_NAME']}"].invoke
       elsif ENV['EC2_AMI'].nil? || ENV['EC2_AMI_DEFAULT_USER'].nil?
-        puts "Defaulting "
-        raise "Either AMI_NAME or both EC2_AMI and EC2_AMI_DEFAULT_USER must be specified if you don't load them via one of the ec2:ami:... tasks."
+        puts "Defaulting to #{DEFAULT_AMI[:description]}."
+        ENV['EC2_AMI'] = DEFAULT_AMI[:ami]
+        ENV['EC2_AMI_DEFAULT_USER'] = DEFAULT_AMI[:ssh_user]
       end
     end
   end
