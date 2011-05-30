@@ -60,7 +60,7 @@ namespace :ec2 do
   require 'pry'
 
   desc "Provision a fresh instance, deploy, run system specs, and terminate. Set INTERACTIVE=true to play with the instance before termination."
-  task :full => :create_archive do
+  task :full => %w( create_archive ec2:ami:from_env ) do
     with_ec2_instance do |instance|
       wait 10, "because otherwise sometimes we can't ssh in just yet"
       retrying 3 do
@@ -83,6 +83,37 @@ namespace :ec2 do
     with_ec2_instance do |instance|
       puts "Instance up."
       binding.pry
+    end
+  end
+
+  namespace :ami do
+    KNOWN_AMIS = {
+      'ubuntu_8.04'  => {:ami => 'ami-6836dc01', :ssh_user => 'ubuntu', :description => 'Ubuntu 8.04 LTS Hardy instance store'},
+      'ubuntu_10.04' => {:ami => 'ami-7000f019', :ssh_user => 'ubuntu', :description => 'Ubuntu 10.04 LTS Lucid instance store'},
+      'ubuntu_10.10' => {:ami => 'ami-a6f504cf', :ssh_user => 'ubuntu', :description => 'Ubuntu 10.10 Maverick instance store'},
+      'ubuntu_11.04' => {:ami => 'ami-e2af508b', :ssh_user => 'ubuntu', :description => 'Ubuntu 11.04 Natty instance store'},
+      'fedora_14'    => {:ami => 'ami-669f680f', :ssh_user => 'ec2-user', :description => 'Fedora 14 instance store'}
+    }
+
+    DEFAULT_AMI = KNOWN_AMIS['ubuntu_10.04']
+
+    KNOWN_AMIS.each_pair do |name, attributes|
+      desc "Use #{attributes[:description]}."
+      task name do
+        puts "Using #{attributes[:description]}."
+        ENV['EC2_AMI'] = attributes[:ami]
+        ENV['EC2_AMI_DEFAULT_USER'] = attributes[:ssh_user]
+      end
+    end
+
+    desc "Set up AMI based on ENV[AMI_NAME] if present."
+    task :from_env do
+      if ENV['AMI_NAME']
+        Rake::Task["ec2:ami:#{ENV['AMI_NAME']}"].invoke
+      elsif ENV['EC2_AMI'].nil? || ENV['EC2_AMI_DEFAULT_USER'].nil?
+        puts "Defaulting "
+        raise "Either AMI_NAME or both EC2_AMI and EC2_AMI_DEFAULT_USER must be specified if you don't load them via one of the ec2:ami:... tasks."
+      end
     end
   end
 end
