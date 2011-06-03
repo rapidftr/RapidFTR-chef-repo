@@ -92,6 +92,8 @@ namespace :ec2 do
       'ubuntu_10.04' => {:ami => 'ami-7000f019', :ssh_user => 'ubuntu', :description => 'Ubuntu 10.04 LTS Lucid instance store'},
       'ubuntu_10.10' => {:ami => 'ami-a6f504cf', :ssh_user => 'ubuntu', :description => 'Ubuntu 10.10 Maverick instance store'},
       'ubuntu_11.04' => {:ami => 'ami-e2af508b', :ssh_user => 'ubuntu', :description => 'Ubuntu 11.04 Natty instance store'},
+      'debian_4.0'   => {:ami => 'ami-def615b7', :ssh_user => 'root', :description => 'Debian 4.0 Etch instance-store'},
+      'debian_5.0'   => {:ami => 'ami-dcf615b5', :ssh_user => 'root', :description => 'Debian 5.0 Lenny instance-store'},
       'fedora_14'    => {:ami => 'ami-669f680f', :ssh_user => 'ec2-user', :description => 'Fedora 14 instance store'}
     }
 
