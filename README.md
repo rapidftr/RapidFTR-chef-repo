@@ -2,7 +2,7 @@
 
 This code supports automated deployment for [RapidFTR](http://rapidftr.com/). It's targeted at enabling anyone with a Linux server to set up their own production-ready instance of RapidFTR with as little manual setup as possible. The implementation is [chef](http://www.opscode.com/chef/)-based, utilizing chef-solo.
 
-At the moment automated deployment is only tested on Ubuntu, but we're interested (to one degree or another) in supporting other Linux distributions and POSIX OSs. (If you want to test and add support for another, see "Contributing" and "Other Platforms" below.)
+At the moment automated deployment is only tested on Ubuntu, but we're interested in supporting other Linux distributions and POSIX OSs. (If you want to test and add support for another, see "Contributing" and "Other Platforms" below.)
 
 The most up-to-date version of this code is currently at <https://github.com/duelinmarkers/RapidFTR-chef-repo>.
 
@@ -88,8 +88,6 @@ To develop on the deployment platform:
 
 	to re-run your local cookbooks on the running VM. (Note that won't start from a clean state, but since starting from a clean state takes a long time it might be worthwhile for faster feedback.)
 
-The (very slim) spec suite that lives in the test directory is ultimately intended to be runnable against a fresh production deployment and provide a "smoke test." For now it only works locally against the Vagrant VM.
-
 ## Testing on EC2 ##
 
 For a more realistic test, you can use Amazon EC2. Set up the following environment variables:
@@ -104,65 +102,6 @@ We use chef-solo because usage of chef-server (or the Opscode Platform) assumes 
 
 ## Other Platforms ##
 
-Many of the chef cookbooks we used as starting points had built in support for several Linux variants, including Ubuntu, Debian, Fedora, and RHEL. We've only tested deployment on Ubuntu, so it's possible we've broken the support those cookbooks offered. We've also created custom recipes that so far make no effort to work on anything other than Ubuntu.
-
-If you want to add support for another OS, feel free to fork the repository and issue pull requests once things are working. Ideally we'd like to verify compatibility with automated tests that deploy to an image of your target OS (maybe using Vagrant). Otherwise we can't know it's working and won't know if we accidentally break it.
+While we've developed for and tested on Ubuntu 10.04, we want RapidFTR to work on other Linux distributions. We've created continuous integration builds using other AMIs, but at this time no one has yet undertaken the work to get things passing. See the [RapidFTR Deployment continuous integration builds](http://ci.rapidftr.com:8111/project.html?projectId=project3&tab=projectOverview) for current state.
 
 
----
-
-Here are the manual steps previously required for production deployment.
-
-These will be removed once the automated deployment is a little more mature.
-
-	# Start with a plain Linux install
-	sudo apt-get update
-	# sudo apt-get upgrade # is that really needed? Shouldn't update be enough?
-	
-	# Install Ruby
-	sudo apt-get install ruby ruby-dev libopenssl-ruby rdoc ri irb build-essential wget ssl-cert
-	
-	# and rubygems
-	cd /tmp
-	wget http://production.cf.rubygems.org/rubygems/rubygems-1.3.7.tgz
-	tar zxf rubygems-1.3.7.tgz
-	cd rubygems-1.3.7
-	sudo ruby setup.rb --no-format-executable
-	
-	# Install chef
-	sudo gem install chef --no-rdoc --no-ri
-	
-	# Put SSL certificates in place
-	scp admin@uganda.rapidftr.com:/home/admin/concatenated.dev.rapidftr.com.crt ~
-	scp admin@uganda.rapidftr.com:/home/admin/dev.rapidftr.com.key ~
-	
-	# Write these config files:
-	
-	# /etc/chef/solo.rb
-	file_cache_path "/tmp/chef-solo"
-	cookbook_path "/tmp/chef-solo/cookbooks"
-	json_attribs "/etc/chef/node.json"
-	recipe_url "https://github.com/downloads/duelinmarkers/RapidFTR-chef-repo/chef-repo.tgz"
-	# role_path "/var/chef-solo/roles"
-	
-	# /etc/chef/node.json
-	{
-		"rapid_ftr":{
-			"ssl_certificate": "/home/rapidftr/concatenated.dev.rapidftr.com.crt",
-			"ssl_certificate_key": "/home/rapidftr/dev.rapidftr.com.key"
-			},
-			"passenger":{
-				"production":{
-					"bins_path": "/usr/bin"
-				}
-			},
-		"run_list": [
-			"recipe[build-essential::default]",
-			"recipe[passenger::daemon]",
-			"recipe[erlang::default]",
-			"recipe[couchdb::default]",
-			"recipe[git::default]",
-			"recipe[rapid_ftr::default]"]
-	}
-	
-	# run chef-solo
