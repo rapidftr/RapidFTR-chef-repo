@@ -62,10 +62,7 @@ namespace :ec2 do
   desc "Provision a fresh instance, deploy, run system specs, and terminate. Set INTERACTIVE=true to play with the instance before termination."
   task :full => %w( create_archive ec2:ami:from_env ) do
     with_ec2_instance do |instance|
-      wait 10, "because otherwise sometimes we can't ssh in just yet"
-      retrying 3 do
-        sh %(scp #{ENV['SSH_OPTIONS']} ../RapidFTR-chef-repo-test.tgz #{ENV['SSH_HOST']}:)
-      end
+      sh %(scp #{ENV['SSH_OPTIONS']} ../RapidFTR-chef-repo-test.tgz #{ENV['SSH_HOST']}:)
       sh %(scp #{ENV['SSH_OPTIONS']} #{vagrant_dir}/localhost.rapidftr.test.crt #{ENV['SSH_HOST']}:)
       sh %(scp #{ENV['SSH_OPTIONS']} #{vagrant_dir}/localhost.rapidftr.test.key #{ENV['SSH_HOST']}:)
       sh %(ssh #{ENV['SSH_OPTIONS']} #{ENV['SSH_HOST']} "mkdir chef-repo")
@@ -146,6 +143,11 @@ def with_ec2_instance
   end
 
   setup_ec2_ssh instance, id_file, ssh_user
+
+  wait 10, "because otherwise sometimes we can't ssh in just yet"
+  retrying 3 do
+    sh %(ssh #{ENV['SSH_OPTIONS']} #{ENV['SSH_HOST']} "echo 'You are connected.'")
+  end
 
   yield instance
 
