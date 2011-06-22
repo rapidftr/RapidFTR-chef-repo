@@ -59,6 +59,8 @@ To develop on the deployment platform:
 
 * Set up the rvm gemset we expect, and cd in to your clone. You should see a message from rvm prompting you to accept our ruby interpreter version and gemset.
 
+		rvm install 1.8.7-p302 # if you don't have it
+		rvm use 1.8.7
 		rvm gemset create RapidFTR-chef-repo
 		cd RapidFTR-chef-repo
 

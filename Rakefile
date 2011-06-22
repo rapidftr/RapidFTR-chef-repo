@@ -1,7 +1,9 @@
 begin
   require 'rspec/core/rake_task'
+  require 'AWS'
+  require 'pry'
 rescue LoadError
-  puts "\nRspec 2 is required.\nMaybe you need a bundle install."
+  puts "\nMaybe you need a bundle install."
   raise
 end
 
@@ -37,6 +39,7 @@ namespace :vagrant do
   end
 
   task :setup_ssh do
+    ENV['INSTANCE_TYPE'] = 'vagrant'
     cd vagrant_dir do
       sh "vagrant ssh_config > vagrant.ssh.config"
       ENV['SSH_OPTIONS'] = "-F #{File.expand_path('vagrant.ssh.config')}"
@@ -55,19 +58,17 @@ task :create_archive do
   sh %(tar czf ../RapidFTR-chef-repo-test.tgz *)
 end
 
-namespace :ec2 do
-  require 'AWS'
-  require 'pry'
+namespace :test do
 
   desc "Provision a fresh instance, deploy, run system specs, and terminate. Set INTERACTIVE=true to play with the instance before termination."
-  task :full => %w( create_archive ec2:ami:from_env ) do
-    with_ec2_instance do |instance|
+  task :full => %w( create_archive ) do
+    with_instance do |instance|
       sh %(scp #{ENV['SSH_OPTIONS']} ../RapidFTR-chef-repo-test.tgz #{ENV['SSH_HOST']}:)
       sh %(scp #{ENV['SSH_OPTIONS']} #{vagrant_dir}/localhost.rapidftr.test.crt #{ENV['SSH_HOST']}:)
       sh %(scp #{ENV['SSH_OPTIONS']} #{vagrant_dir}/localhost.rapidftr.test.key #{ENV['SSH_HOST']}:)
       sh %(ssh #{ENV['SSH_OPTIONS']} #{ENV['SSH_HOST']} "mkdir chef-repo")
       sh %(ssh #{ENV['SSH_OPTIONS']} #{ENV['SSH_HOST']} "tar xzf RapidFTR-chef-repo-test.tgz --directory chef-repo")
-      sh %(ssh #{ENV['SSH_OPTIONS']} #{ENV['SSH_HOST']} "cd chef-repo/ && sudo env SSL_CRT=/home/ubuntu/localhost.rapidftr.test.crt SSL_KEY=/home/ubuntu/localhost.rapidftr.test.key FQDN=#{instance.dnsName} ./setup-ubuntu.sh")
+      sh %(ssh #{ENV['SSH_OPTIONS']} #{ENV['SSH_HOST']} "cd chef-repo/ && sudo env SSL_CRT=/home/#{instance.ssh_user}/localhost.rapidftr.test.crt SSL_KEY=/home/#{instance.ssh_user}/localhost.rapidftr.test.key FQDN=#{instance.public_dns_name} ./setup-ubuntu.sh")
       sh %(ssh #{ENV['SSH_OPTIONS']} #{ENV['SSH_HOST']} "sudo chef-solo")
       Rake::Task['system_spec'].invoke
       binding.pry if interactive?
@@ -77,11 +78,14 @@ namespace :ec2 do
   desc "Provision a fresh instance and get interactive with it."
   task :up_and_down do
     raise "INTERACTIVE is not 'true'! That's all this task is for." unless interactive?
-    with_ec2_instance do |instance|
+    with_instance do |instance|
       puts "Instance up."
       binding.pry
     end
   end
+end
+
+namespace :ec2 do
 
   namespace :ami do
     KNOWN_AMIS = {
@@ -100,6 +104,7 @@ namespace :ec2 do
       desc "Use #{attributes[:description]}."
       task name do
         puts "Using #{attributes[:description]}."
+        ENV['INSTANCE_TYPE'] = 'ec2'
         ENV['EC2_AMI'] = attributes[:ami]
         ENV['EC2_AMI_DEFAULT_USER'] = attributes[:ssh_user]
       end
@@ -111,11 +116,32 @@ namespace :ec2 do
         Rake::Task["ec2:ami:#{ENV['AMI_NAME']}"].invoke
       elsif ENV['EC2_AMI'].nil? || ENV['EC2_AMI_DEFAULT_USER'].nil?
         puts "Defaulting to #{DEFAULT_AMI[:description]}."
+        ENV['INSTANCE_TYPE'] = 'ec2'
         ENV['EC2_AMI'] = DEFAULT_AMI[:ami]
         ENV['EC2_AMI_DEFAULT_USER'] = DEFAULT_AMI[:ssh_user]
       end
     end
   end
+end
+
+InstanceInfo = Struct.new(:public_dns_name, :ssh_user)
+
+def with_instance &block
+  instance_type = ENV['INSTANCE_TYPE']
+  case instance_type
+  when 'vagrant'
+    with_vagrant_instance &block
+  when 'ec2'
+    with_ec2_instance &block
+  else
+    raise "INSTANCE_TYPE #{instance_type.inspect} no good! Use a setup rake task."
+  end
+end
+
+def with_vagrant_instance
+  Rake::Task['vagrant:deploy'].invoke
+  yield InstanceInfo.new 'rapidftr.dev', 'vagrant'
+  Rake::Task['vagrant:destroy'].invoke
 end
 
 def with_ec2_instance
@@ -149,7 +175,7 @@ def with_ec2_instance
     sh %(ssh #{ENV['SSH_OPTIONS']} #{ENV['SSH_HOST']} "echo 'You are connected.'")
   end
 
-  yield instance
+  yield InstanceInfo.new instance.dnsName, ssh_user
 
 rescue Exception => e
   $stderr.puts e
