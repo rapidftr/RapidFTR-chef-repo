@@ -41,9 +41,10 @@ namespace :vagrant do
   task :setup_ssh do
     ENV['INSTANCE_TYPE'] = 'vagrant'
     cd vagrant_dir do
+      sh "vagrant up"
       sh "vagrant ssh_config > vagrant.ssh.config"
       ENV['SSH_OPTIONS'] = "-F #{File.expand_path('vagrant.ssh.config')}"
-      ENV['SSH_HOST'] = "vagrant"
+      ENV['SSH_HOST'] = "default"
     end
   end
 end
