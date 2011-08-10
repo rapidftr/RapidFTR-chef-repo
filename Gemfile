@@ -5,6 +5,7 @@
 source :rubygems
 
 gem "chef"
+gem "rake"
 
 group :test do
   gem "rspec-core"
