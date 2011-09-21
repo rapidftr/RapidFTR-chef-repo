@@ -7,86 +7,198 @@ rescue LoadError
   raise
 end
 
-desc "Run system specs on an existing instance."
-task :default => %w( vagrant:setup_ssh system_spec )
+$vagrant_dir = File.join(File.dirname(__FILE__), 'test/vagrant')
 
-vagrant_dir = File.join(File.dirname(__FILE__), 'test/vagrant')
+# Goal state:
+# Platform-specific configure tasks set $machine to be operated on by common tasks.
+# namespace :common
+#   :provision
+#   :test
+#   :boot (including at_exit to terminate)
+#   :full => %w( common:boot common:provision common:test )
+#   :setup_dev_provisioning
 
-namespace :vagrant do
+namespace :common do
+  task :boot do
+    $machine.boot_and_register_for_termination
+  end
 
-  desc "Deploy fresh instance and run system specs."
-  task :full => %w( vagrant:deploy vagrant:setup_ssh system_spec )
+  task :create_archive do
+    sh %(tar czf ../RapidFTR-chef-repo-test.tgz *)
+  end
 
-  desc "Deploy a fresh vagrant instance (destroying an existing instance)."
-  task :deploy do
-    cd vagrant_dir do
+  task :provision => %w( common:boot common:create_archive ) do
+    sh %(scp #{$machine.ssh_options} ../RapidFTR-chef-repo-test.tgz #{$machine.ssh_host}:)
+    sh %(scp #{$machine.ssh_options} #{$vagrant_dir}/localhost.rapidftr.test.crt #{$machine.ssh_host}:)
+    sh %(scp #{$machine.ssh_options} #{$vagrant_dir}/localhost.rapidftr.test.key #{$machine.ssh_host}:)
+    sh %(ssh #{$machine.ssh_options} #{$machine.ssh_host} "mkdir chef-repo")
+    sh %(ssh #{$machine.ssh_options} #{$machine.ssh_host} "tar xzf RapidFTR-chef-repo-test.tgz --directory chef-repo")
+    sh %(ssh #{$machine.ssh_options} #{$machine.ssh_host} "cd chef-repo/ && \
+        sudo \
+          env \
+            SSL_CRT=/home/#{$machine.ssh_user}/localhost.rapidftr.test.crt \
+            SSL_KEY=/home/#{$machine.ssh_user}/localhost.rapidftr.test.key \
+            FQDN=#{$machine.public_dns_name} \
+            #{$additional_env_for_setup} \
+            ./setup-ubuntu.sh")
+    sh %(ssh #{$machine.ssh_options} #{$machine.ssh_host} "sudo chef-solo")
+  end
+
+  task :export_env_for_spec do
+    ENV['SSH_OPTIONS'] = $machine.ssh_options
+    ENV['SSH_HOST'] = $machine.ssh_host
+  end
+
+  RSpec::Core::RakeTask.new('system_spec') do |t|
+    t.rspec_opts = ["--color", "--format documentation", "--require ./test/spec_helper.rb"]
+    t.pattern = 'test/*_spec.rb'
+  end
+  task :system_spec => 'common:export_env_for_spec'
+
+end
+
+class Machine
+  attr_accessor :ssh_options, :ssh_host, :ssh_user, :public_dns_name, :additional_env_for_setup
+
+  def boot_and_register_for_termination
+    boot
+    at_exit do
+      if interactive?
+        puts "Interactive! Exit pry to let the machine terminate."
+        binding.pry
+      end
+      terminate
+    end
+  end
+end
+
+class VagrantMachine < Machine
+  def initialize
+    cd $vagrant_dir do
+      sh "vagrant up"
+      sh "vagrant ssh_config > vagrant.ssh.config"
+      @ssh_options = "-F #{File.expand_path('vagrant.ssh.config')}"
+    end
+    @ssh_host = 'default'
+    @ssh_user = 'vagrant'
+    @public_dns_name = 'www.rapidftr.dev'
+  end
+
+  def boot
+    cd $vagrant_dir do
       sh 'vagrant destroy'
       sh 'vagrant up'
     end
   end
 
-  task :destroy do
-    cd vagrant_dir do
+  def terminate
+    cd $vagrant_dir do
       sh 'vagrant destroy'
     end
   end
+end
 
-  desc "Re-provision running instance from local chef cookbooks."
-  task :reprovision do
-    cd vagrant_dir do
-      sh 'vagrant provision'
+class Ec2Machine < Machine
+  def boot
+    key_id, key, id_file = ec2_auth_stuff
+    instance_type, ami, @ssh_user = ec2_instance_stuff
+    @ec2 = AWS::EC2::Base.new(:access_key_id => key_id, :secret_access_key => key)
+    puts "Launching #{instance_type} instance with AMI #{ami}"
+    r = @ec2.run_instances(
+      :image_id => ami,
+      :disable_api_termination => false,
+      :instance_type => instance_type,
+      :key_name => File.basename(id_file, '.pem'))
+    @instance_id = r.instancesSet.item.first.instanceId
+    instance = nil
+    attempts = 0
+    wait 30, "for launch of instance #{@instance_id}"
+    loop do
+      description = @ec2.describe_instances(:instance_id => @instance_id)
+      instance = description.reservationSet.item[0].instancesSet.item[0]
+      puts "Instance is #{instance.instanceState.name}"
+      break if instance.instanceState.name == "running"
+      attempts += 1
+      raise "Instance still not running after #{attempts} checks!" if attempts > 20
+      wait 8, "for instance #{@instance_id} to be running"
+    end
+
+    setup_ec2_ssh instance, id_file
+
+    wait 10, "because otherwise sometimes we can't ssh in just yet"
+    retrying 3 do
+      sh %(ssh #{$machine.ssh_options} #{$machine.ssh_host} "echo 'You are connected.'")
+    end
+
+    #$instance = InstanceInfo.new instance.dnsName, ssh_user, [ec2, instance_id]
+    @public_dns_name = instance.dnsName
+  end
+
+  def terminate
+    if @ec2
+      puts "Terminating instance #{@instance_id}."
+      @ec2.terminate_instances :instance_id => [@instance_id]
+    else
+      puts "EC2 not set up. HOPEFULLY no instance was launched!"
     end
   end
 
-  task :setup_ssh do
-    ENV['INSTANCE_TYPE'] = 'vagrant'
-    cd vagrant_dir do
-      sh "vagrant up"
-      sh "vagrant ssh_config > vagrant.ssh.config"
-      ENV['SSH_OPTIONS'] = "-F #{File.expand_path('vagrant.ssh.config')}"
-      ENV['SSH_HOST'] = "default"
+  private
+
+  def setup_ec2_ssh instance, id_file
+    File.open('test/aws.ssh.config', 'w') do |file|
+      file.write "Host ec2
+      HostName #{instance.dnsName}
+      User #{ssh_user}
+      UserKnownHostsFile /dev/null
+      StrictHostKeyChecking no
+      PasswordAuthentication no
+      IdentityFile #{File.expand_path(id_file)}
+      IdentitiesOnly yes"
+      file.puts
     end
+    @ssh_options = "-F #{File.expand_path('test/aws.ssh.config')}"
+    @ssh_host = 'ec2'
+    @public_dns_name = 'www.rapidftr.dev'
+  end
+
+  def ec2_auth_stuff
+    key_id = ENV['AMAZON_ACCESS_KEY_ID']
+    key = ENV['AMAZON_SECRET_ACCESS_KEY'] ||
+      (ENV['AMAZON_SECRET_ACCESS_KEY_FILE'] && `cat #{ENV['AMAZON_SECRET_ACCESS_KEY_FILE']}`.chomp) ||
+      raise("AMAZON_SECRET_ACCESS_KEY or AMAZON_SECRET_ACCESS_KEY_FILE is required")
+    id_file = ENV['RAPID_FTR_IDENTITY_FILE']
+    [key_id, key, id_file]
+  end
+
+  def ec2_instance_stuff
+    instance_type = ENV['EC2_INSTANCE_TYPE'] || 'c1.medium'
+    ami = ENV['EC2_AMI'] || 'ami-7000f019' # Ubuntu 10.04 LTS Lucid instance-store from http://alestic.com/
+    ssh_user = ENV['EC2_AMI_DEFAULT_USER'] || 'ubuntu'
+    [instance_type, ami, ssh_user]
   end
 end
 
-desc "Run specs to check the health of a system. No dependencies defined here because you might want vagrant, EC2, or some other instance pointed to by SSH_OPTIONS and SSH_HOST."
-RSpec::Core::RakeTask.new('system_spec') do |t|
-  t.rspec_opts = ["--color", "--format documentation", "--require ./test/spec_helper.rb"]
-  t.pattern = 'test/*_spec.rb'
-end
+namespace :vagrant do
 
-task :create_archive do
-  sh %(tar czf ../RapidFTR-chef-repo-test.tgz *)
-end
-
-namespace :test do
-
-  desc "Provision a fresh instance, deploy, run system specs, and terminate. Set INTERACTIVE=true to play with the instance before termination."
-  task :full => %w( create_archive ) do
-    with_instance do |instance|
-      sh %(scp #{ENV['SSH_OPTIONS']} ../RapidFTR-chef-repo-test.tgz #{ENV['SSH_HOST']}:)
-      sh %(scp #{ENV['SSH_OPTIONS']} #{vagrant_dir}/localhost.rapidftr.test.crt #{ENV['SSH_HOST']}:)
-      sh %(scp #{ENV['SSH_OPTIONS']} #{vagrant_dir}/localhost.rapidftr.test.key #{ENV['SSH_HOST']}:)
-      sh %(ssh #{ENV['SSH_OPTIONS']} #{ENV['SSH_HOST']} "mkdir chef-repo")
-      sh %(ssh #{ENV['SSH_OPTIONS']} #{ENV['SSH_HOST']} "tar xzf RapidFTR-chef-repo-test.tgz --directory chef-repo")
-      sh %(ssh #{ENV['SSH_OPTIONS']} #{ENV['SSH_HOST']} "cd chef-repo/ && sudo env SSL_CRT=/home/#{instance.ssh_user}/localhost.rapidftr.test.crt SSL_KEY=/home/#{instance.ssh_user}/localhost.rapidftr.test.key FQDN=#{instance.public_dns_name} ./setup-ubuntu.sh")
-      sh %(ssh #{ENV['SSH_OPTIONS']} #{ENV['SSH_HOST']} "sudo chef-solo")
-      Rake::Task['system_spec'].invoke
-      binding.pry if interactive?
-    end
+  desc "Configure the process for a vagrant run."
+  task :configure do
+    $machine = VagrantMachine.new
   end
 
-  desc "Provision a fresh instance and get interactive with it."
-  task :up_and_down do
-    raise "INTERACTIVE is not 'true'! That's all this task is for." unless interactive?
-    with_instance do |instance|
-      puts "Instance up."
-      binding.pry
-    end
-  end
+  desc "Deploy fresh instance and run system specs."
+  task :full => %w( vagrant:configure common:provision common:system_spec )
 end
 
 namespace :ec2 do
+
+  desc "Configure the process for an EC2 run."
+  task :configure do
+    $machine = Ec2Machine.new # TODO: pass in AMI stuff based on ENV vars.
+  end
+
+  desc "Deploy fresh instance and run system specs."
+  task :full => %w( ec2:configure common:provision common:system_spec )
 
   namespace :ami do
     KNOWN_AMIS = {
@@ -123,107 +235,6 @@ namespace :ec2 do
       end
     end
   end
-end
-
-InstanceInfo = Struct.new(:public_dns_name, :ssh_user)
-
-def with_instance &block
-  instance_type = ENV['INSTANCE_TYPE']
-  case instance_type
-  when 'vagrant'
-    with_vagrant_instance &block
-  when 'ec2'
-    with_ec2_instance &block
-  else
-    raise "INSTANCE_TYPE #{instance_type.inspect} no good! Use a setup rake task."
-  end
-end
-
-def with_vagrant_instance
-  Rake::Task['vagrant:deploy'].invoke
-  yield InstanceInfo.new 'rapidftr.dev', 'vagrant'
-  Rake::Task['vagrant:destroy'].invoke
-end
-
-def with_ec2_instance
-  key_id, key, id_file = ec2_auth_stuff
-  instance_type, ami, ssh_user = ec2_instance_stuff
-  ec2 = AWS::EC2::Base.new(:access_key_id => key_id, :secret_access_key => key)
-  puts "Launching #{instance_type} instance with AMI #{ami}"
-  r = ec2.run_instances(
-    :image_id => ami,
-    :disable_api_termination => false,
-    :instance_type => instance_type,
-    :key_name => File.basename(id_file, '.pem'))
-  instance_id = r.instancesSet.item.first.instanceId
-  instance = nil
-  attempts = 0
-  wait 30, "for launch of instance #{instance_id}"
-  loop do
-    description = ec2.describe_instances(:instance_id => instance_id)
-    instance = description.reservationSet.item[0].instancesSet.item[0]
-    puts "Instance is #{instance.instanceState.name}"
-    break if instance.instanceState.name == "running"
-    attempts += 1
-    raise "Instance still not running after #{attempts} checks!" if attempts > 20
-    wait 8, "for instance #{instance_id} to be running"
-  end
-
-  setup_ec2_ssh instance, id_file, ssh_user
-
-  wait 10, "because otherwise sometimes we can't ssh in just yet"
-  retrying 3 do
-    sh %(ssh #{ENV['SSH_OPTIONS']} #{ENV['SSH_HOST']} "echo 'You are connected.'")
-  end
-
-  yield InstanceInfo.new instance.dnsName, ssh_user
-
-rescue Exception => e
-  $stderr.puts e
-  raise
-ensure
-  if interactive?
-    puts "Going to terminate instance #{instance_id}."
-    binding.pry
-  end
-  if ec2
-    puts "Terminating instance #{instance_id}."
-    ec2.terminate_instances :instance_id => [instance_id]
-  else
-    puts "EC2 not set up. HOPEFULLY no instance was launched!"
-  end
-end
-
-def ec2_auth_stuff
-  key_id = ENV['AMAZON_ACCESS_KEY_ID']
-  key = ENV['AMAZON_SECRET_ACCESS_KEY'] ||
-    (ENV['AMAZON_SECRET_ACCESS_KEY_FILE'] && `cat #{ENV['AMAZON_SECRET_ACCESS_KEY_FILE']}`.chomp) ||
-    raise("AMAZON_SECRET_ACCESS_KEY or AMAZON_SECRET_ACCESS_KEY_FILE is required")
-  id_file = ENV['RAPID_FTR_IDENTITY_FILE']
-  [key_id, key, id_file]
-end
-
-def ec2_instance_stuff
-  instance_type = ENV['EC2_INSTANCE_TYPE'] || 'c1.medium'
-  ami = ENV['EC2_AMI'] || 'ami-7000f019' # Ubuntu 10.04 LTS Lucid instance-store from http://alestic.com/
-  ssh_user = ENV['EC2_AMI_DEFAULT_USER'] || 'ubuntu'
-  [instance_type, ami, ssh_user]
-end
-
-def setup_ec2_ssh instance, id_file, ssh_user
-  File.open('test/aws.ssh.config', 'w') do |file|
-    file.write "Host ec2
-      HostName #{instance.dnsName}
-      User #{ssh_user}
-      UserKnownHostsFile /dev/null
-      StrictHostKeyChecking no
-      PasswordAuthentication no
-      IdentityFile #{File.expand_path(id_file)}
-      IdentitiesOnly yes"
-    file.puts
-  end
-  ENV['SSH_OPTIONS'] = "-F #{File.expand_path('test/aws.ssh.config')}"
-  ENV['SSH_HOST'] = "ec2"
 end
 
 def wait seconds, reason
