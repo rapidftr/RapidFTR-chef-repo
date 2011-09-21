@@ -123,15 +123,13 @@ class Ec2Machine < Machine
       wait 8, "for instance #{@instance_id} to be running"
     end
 
+    @public_dns_name = instance.dnsName
     setup_ec2_ssh instance, id_file
 
     wait 10, "because otherwise sometimes we can't ssh in just yet"
     retrying 3 do
       sh %(ssh #{$machine.ssh_options} #{$machine.ssh_host} "echo 'You are connected.'")
     end
-
-    #$instance = InstanceInfo.new instance.dnsName, ssh_user, [ec2, instance_id]
-    @public_dns_name = instance.dnsName
   end
 
   def terminate
