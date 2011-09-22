@@ -9,15 +9,6 @@ end
 
 $vagrant_dir = File.join(File.dirname(__FILE__), 'test/vagrant')
 
-# Goal state:
-# Platform-specific configure tasks set $machine to be operated on by common tasks.
-# namespace :common
-#   :provision
-#   :test
-#   :boot (including at_exit to terminate)
-#   :full => %w( common:boot common:provision common:test )
-#   :setup_dev_provisioning
-
 namespace :common do
   task :boot do
     $machine.boot_and_register_for_termination
@@ -57,6 +48,68 @@ namespace :common do
 
 end
 
+namespace :vagrant do
+
+  desc "Configure the process for a vagrant run."
+  task :configure do
+    $machine = VagrantMachine.new
+  end
+
+  desc "Deploy fresh instance and run system specs."
+  task :full => %w( vagrant:configure common:provision common:system_spec )
+
+  task :package => %w( vagrant:configure common:provision ) do
+    $machine.package
+  end
+end
+
+namespace :ec2 do
+
+  desc "Configure the process for an EC2 run."
+  task :configure do
+    $machine = Ec2Machine.new
+  end
+
+  desc "Deploy fresh instance and run system specs."
+  task :full => %w( ec2:configure common:provision common:system_spec )
+
+  namespace :ami do
+    KNOWN_AMIS = {
+      'ubuntu_8.04'  => {:ami => 'ami-6836dc01', :ssh_user => 'ubuntu', :description => 'Ubuntu 8.04 LTS Hardy instance store'},
+      'ubuntu_10.04' => {:ami => 'ami-7000f019', :ssh_user => 'ubuntu', :description => 'Ubuntu 10.04 LTS Lucid instance store'},
+      'ubuntu_10.10' => {:ami => 'ami-a6f504cf', :ssh_user => 'ubuntu', :description => 'Ubuntu 10.10 Maverick instance store'},
+      'ubuntu_11.04' => {:ami => 'ami-e2af508b', :ssh_user => 'ubuntu', :description => 'Ubuntu 11.04 Natty instance store'},
+      'debian_4.0'   => {:ami => 'ami-def615b7', :ssh_user => 'root', :description => 'Debian 4.0 Etch instance-store'},
+      'debian_5.0'   => {:ami => 'ami-dcf615b5', :ssh_user => 'root', :description => 'Debian 5.0 Lenny instance-store'},
+      'fedora_14'    => {:ami => 'ami-669f680f', :ssh_user => 'ec2-user', :description => 'Fedora 14 instance store'}
+    }
+
+    DEFAULT_AMI = KNOWN_AMIS['ubuntu_10.04']
+
+    KNOWN_AMIS.each_pair do |name, attributes|
+      desc "Use #{attributes[:description]}."
+      task name do
+        puts "Using #{attributes[:description]}."
+        ENV['INSTANCE_TYPE'] = 'ec2'
+        ENV['EC2_AMI'] = attributes[:ami]
+        ENV['EC2_AMI_DEFAULT_USER'] = attributes[:ssh_user]
+      end
+    end
+
+    desc "Set up AMI based on ENV[AMI_NAME] if present."
+    task :from_env do
+      if ENV['AMI_NAME']
+        Rake::Task["ec2:ami:#{ENV['AMI_NAME']}"].invoke
+      elsif ENV['EC2_AMI'].nil? || ENV['EC2_AMI_DEFAULT_USER'].nil?
+        puts "Defaulting to #{DEFAULT_AMI[:description]}."
+        ENV['INSTANCE_TYPE'] = 'ec2'
+        ENV['EC2_AMI'] = DEFAULT_AMI[:ami]
+        ENV['EC2_AMI_DEFAULT_USER'] = DEFAULT_AMI[:ssh_user]
+      end
+    end
+  end
+end
+
 class Machine
   attr_accessor :ssh_options, :ssh_host, :ssh_user, :public_dns_name, :additional_env_for_setup
 
@@ -94,6 +147,12 @@ class VagrantMachine < Machine
   def terminate
     cd $vagrant_dir do
       sh 'vagrant destroy'
+    end
+  end
+
+  def package
+    cd $vagrant_dir do
+      sh 'vagrant package --vagrantfile Vagrantfile'
     end
   end
 end
@@ -174,64 +233,6 @@ class Ec2Machine < Machine
     ami = ENV['EC2_AMI'] || 'ami-7000f019' # Ubuntu 10.04 LTS Lucid instance-store from http://alestic.com/
     ssh_user = ENV['EC2_AMI_DEFAULT_USER'] || 'ubuntu'
     [instance_type, ami, ssh_user]
-  end
-end
-
-namespace :vagrant do
-
-  desc "Configure the process for a vagrant run."
-  task :configure do
-    $machine = VagrantMachine.new
-  end
-
-  desc "Deploy fresh instance and run system specs."
-  task :full => %w( vagrant:configure common:provision common:system_spec )
-end
-
-namespace :ec2 do
-
-  desc "Configure the process for an EC2 run."
-  task :configure do
-    $machine = Ec2Machine.new # TODO: pass in AMI stuff based on ENV vars.
-  end
-
-  desc "Deploy fresh instance and run system specs."
-  task :full => %w( ec2:configure common:provision common:system_spec )
-
-  namespace :ami do
-    KNOWN_AMIS = {
-      'ubuntu_8.04'  => {:ami => 'ami-6836dc01', :ssh_user => 'ubuntu', :description => 'Ubuntu 8.04 LTS Hardy instance store'},
-      'ubuntu_10.04' => {:ami => 'ami-7000f019', :ssh_user => 'ubuntu', :description => 'Ubuntu 10.04 LTS Lucid instance store'},
-      'ubuntu_10.10' => {:ami => 'ami-a6f504cf', :ssh_user => 'ubuntu', :description => 'Ubuntu 10.10 Maverick instance store'},
-      'ubuntu_11.04' => {:ami => 'ami-e2af508b', :ssh_user => 'ubuntu', :description => 'Ubuntu 11.04 Natty instance store'},
-      'debian_4.0'   => {:ami => 'ami-def615b7', :ssh_user => 'root', :description => 'Debian 4.0 Etch instance-store'},
-      'debian_5.0'   => {:ami => 'ami-dcf615b5', :ssh_user => 'root', :description => 'Debian 5.0 Lenny instance-store'},
-      'fedora_14'    => {:ami => 'ami-669f680f', :ssh_user => 'ec2-user', :description => 'Fedora 14 instance store'}
-    }
-
-    DEFAULT_AMI = KNOWN_AMIS['ubuntu_10.04']
-
-    KNOWN_AMIS.each_pair do |name, attributes|
-      desc "Use #{attributes[:description]}."
-      task name do
-        puts "Using #{attributes[:description]}."
-        ENV['INSTANCE_TYPE'] = 'ec2'
-        ENV['EC2_AMI'] = attributes[:ami]
-        ENV['EC2_AMI_DEFAULT_USER'] = attributes[:ssh_user]
-      end
-    end
-
-    desc "Set up AMI based on ENV[AMI_NAME] if present."
-    task :from_env do
-      if ENV['AMI_NAME']
-        Rake::Task["ec2:ami:#{ENV['AMI_NAME']}"].invoke
-      elsif ENV['EC2_AMI'].nil? || ENV['EC2_AMI_DEFAULT_USER'].nil?
-        puts "Defaulting to #{DEFAULT_AMI[:description]}."
-        ENV['INSTANCE_TYPE'] = 'ec2'
-        ENV['EC2_AMI'] = DEFAULT_AMI[:ami]
-        ENV['EC2_AMI_DEFAULT_USER'] = DEFAULT_AMI[:ssh_user]
-      end
-    end
   end
 end
 
