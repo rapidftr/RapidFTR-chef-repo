@@ -8,6 +8,7 @@ rescue LoadError
 end
 
 $vagrant_dir = File.join(File.dirname(__FILE__), 'test/vagrant')
+$tarball_name = 'RapidFTR-chef-repo-test.tgz'
 
 namespace :common do
   task :boot do
@@ -15,15 +16,15 @@ namespace :common do
   end
 
   task :create_archive do
-    sh %(tar czf ../RapidFTR-chef-repo-test.tgz *)
+    sh %(tar czf ../#{$tarball_name} *)
   end
 
   task :provision => %w( common:boot common:create_archive ) do
-    sh %(scp #{$machine.ssh_options} ../RapidFTR-chef-repo-test.tgz #{$machine.ssh_host}:)
+    sh %(scp #{$machine.ssh_options} ../#{$tarball_name} #{$machine.ssh_host}:)
     sh %(scp #{$machine.ssh_options} #{$vagrant_dir}/localhost.rapidftr.test.crt #{$machine.ssh_host}:)
     sh %(scp #{$machine.ssh_options} #{$vagrant_dir}/localhost.rapidftr.test.key #{$machine.ssh_host}:)
     sh %(ssh #{$machine.ssh_options} #{$machine.ssh_host} "mkdir chef-repo")
-    sh %(ssh #{$machine.ssh_options} #{$machine.ssh_host} "tar xzf RapidFTR-chef-repo-test.tgz --directory chef-repo")
+    sh %(ssh #{$machine.ssh_options} #{$machine.ssh_host} "tar xzf #{$tarball_name} --directory chef-repo")
     sh %(ssh #{$machine.ssh_options} #{$machine.ssh_host} "cd chef-repo/ && \
         sudo \
           env \
