@@ -12,7 +12,7 @@ echo "Updating apt package index..."
 sudo apt-get --yes update
 
 echo "Installing chef's required apt packages..."
-sudo apt-get --yes install build-essential wget ssl-cert
+sudo apt-get --yes install build-essential wget ssl-cert libreadline6 libreadline6-dev openssl libssl-dev zlib1g zlib1g-dev
 
 echo "Installing ruby $RUBY_VERSION from source..."
 cd /tmp
