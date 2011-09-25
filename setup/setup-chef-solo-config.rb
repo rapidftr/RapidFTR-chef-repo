@@ -17,27 +17,32 @@ def env_value? env_var
   ENV[env_var] && ENV[env_var] != ''
 end
 
+def write_file name, content
+  puts "Writing #{name}..."
+  puts content
+  File.open(name, 'w') do |file|
+    file.write content
+  end
+end
+
 repo_root = File.expand_path(File.dirname(__FILE__) + '/..')
 solo_config = "/etc/chef/solo.rb"
 node_attribute_file = '/etc/chef/node.json'
 
 FileUtils.mkdir_p "/etc/chef"
 
-puts "Writing #{solo_config}..."
-File.open(solo_config, 'w') do |file|
-  file.write <<-END
+write_file solo_config, <<-END
 # Generated from #{File.expand_path(__FILE__)} on #{Time.now}.
 file_cache_path "#{repo_root}"
 cookbook_path "#{repo_root}/cookbooks"
 json_attribs "/etc/chef/node.json"
 role_path "#{repo_root}/roles"
-  END
-end
+END
 
 puts "
 
 **************************************************************
-To generate chef-solo configuration, we need some information.
+To generate chef-solo node configuration, we need some information.
 
 First we'll deal with SSL certificates. Please provide the locations
 where these files can be found. It's ok if the files aren't there yet,
@@ -61,21 +66,19 @@ fqdn = get 'FQDN', "Enter the publicly accessible domain name of your server:"
 
 puts "
 
-**************************************************************
-Writing #{node_attribute_file}..."
-File.open(node_attribute_file, 'w') do |file|
-  file.write <<-END
+**************************************************************"
+
+write_file node_attribute_file, <<-END
 {
 	"rapid_ftr":{
 		"ssl_certificate": "#{ssl_crt}",
 		"ssl_certificate_key": "#{ssl_key}"
 		#{%(,"app_server_fqdn":"#{fqdn}") unless fqdn.empty?}
 	},
-	"passenger":{ "production":{ "bins_path": "/usr/bin" } },
+	"passenger":{ "production":{ "bins_path": "/usr/local/bin" } },
 	"run_list":["role[#{env_value?('CHEF_ROLE') ? ENV['CHEF_ROLE'] : 'default'}]"]
 }
-  END
-end
+END
 
 puts "
 **************************************************************

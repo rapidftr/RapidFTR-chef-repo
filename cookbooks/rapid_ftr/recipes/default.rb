@@ -58,7 +58,7 @@ deploy_revision "/srv/rapid_ftr" do
   user "root"
   enable_submodules true
   migrate true
-  migration_command "/usr/bin/bundle install"
+  migration_command "/usr/local/bin/bundle install"
   environment "RAILS_ENV" => "production"
   shallow_clone true
   action :deploy

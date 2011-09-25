@@ -1,5 +1,6 @@
 #!/bin/bash
 
+RUBY_VERSION=1.8.7-p302
 RUBYGEMS_VERSION=1.7.2
 
 INITIAL_DIR=`pwd`
@@ -11,7 +12,16 @@ echo "Updating apt package index..."
 sudo apt-get --yes update
 
 echo "Installing chef's required apt packages..."
-sudo apt-get --yes install ruby ruby-dev libopenssl-ruby rdoc ri irb build-essential wget ssl-cert
+sudo apt-get --yes install build-essential wget ssl-cert
+
+echo "Installing ruby $RUBY_VERSION from source..."
+cd /tmp
+wget http://ftp.ruby-lang.org/pub/ruby/1.8/ruby-$RUBY_VERSION.tar.gz
+tar xzf ruby-$RUBY_VERSION.tar.gz
+cd ruby-$RUBY_VERSION
+./configure
+make
+sudo make install
 
 echo "Installing rubygems $RUBYGEMS_VERSION from source..."
 cd /tmp

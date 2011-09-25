@@ -18,7 +18,7 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Solr init script for RapidFTR"
 NAME=solr
 DAEMON=/usr/bin/java
-SOLR_LOCATION=/usr/lib/ruby/gems/1.8/gems/sunspot-1.1.0/solr
+SOLR_LOCATION=/usr/local/lib/ruby/gems/1.8/gems/sunspot-1.1.0/solr
 DAEMON_ARGS="-Djetty.port=8902 -Dsolr.data.dir=/srv/rapid_ftr/shared/sunspot_index -Dsolr.solr.home=$SOLR_LOCATION/solr -jar start.jar"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
