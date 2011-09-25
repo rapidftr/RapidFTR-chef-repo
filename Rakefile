@@ -36,17 +36,20 @@ namespace :common do
     sh %(ssh #{$machine.ssh_options} #{$machine.ssh_host} "sudo chef-solo")
   end
 
-  task :export_env_for_spec do
-    ENV['SSH_OPTIONS'] = $machine.ssh_options
-    ENV['SSH_HOST'] = $machine.ssh_host
-  end
-
   RSpec::Core::RakeTask.new('system_spec') do |t|
     t.rspec_opts = ["--color", "--format documentation", "--require ./test/spec_helper.rb"]
     t.pattern = 'test/*_spec.rb'
   end
   task :system_spec => 'common:export_env_for_spec'
 
+  task :env_for_dev_machine do
+    $additional_env_for_setup = "CHEF_ROLE=rails_developer"
+  end
+
+  task :export_env_for_spec do
+    ENV['SSH_OPTIONS'] = $machine.ssh_options
+    ENV['SSH_HOST'] = $machine.ssh_host
+  end
 end
 
 namespace :vagrant do
@@ -59,7 +62,7 @@ namespace :vagrant do
   desc "Deploy fresh instance and run system specs."
   task :full => %w( vagrant:configure common:provision common:system_spec )
 
-  task :package => %w( vagrant:configure common:provision ) do
+  task :package => %w( vagrant:configure common:env_for_dev_machine common:provision ) do
     $machine.package
   end
 end
@@ -140,7 +143,6 @@ class VagrantMachine < Machine
 
   def boot
     cd $vagrant_dir do
-      sh 'vagrant destroy'
       sh 'vagrant up'
     end
   end

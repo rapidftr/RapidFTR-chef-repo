@@ -5,12 +5,16 @@ require 'erb'
 require 'readline'
 
 def get env_var, prompt
-  if ENV[env_var]
+  if env_value? env_var
     puts "Using #{env_var} #{ENV[env_var]}"
     ENV[env_var]
   else
     Readline.readline prompt
   end
+end
+
+def env_value? env_var
+  ENV[env_var] && ENV[env_var] != ''
 end
 
 repo_root = File.expand_path(File.dirname(__FILE__) + '/..')
@@ -68,7 +72,7 @@ File.open(node_attribute_file, 'w') do |file|
 		#{%(,"app_server_fqdn":"#{fqdn}") unless fqdn.empty?}
 	},
 	"passenger":{ "production":{ "bins_path": "/usr/bin" } },
-	"run_list":["role[default]"]
+	"run_list":["role[#{env_value?('CHEF_ROLE') ? ENV['CHEF_ROLE'] : 'default'}]"]
 }
   END
 end

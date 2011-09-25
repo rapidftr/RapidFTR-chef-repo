@@ -24,4 +24,4 @@ echo "Installing chef..."
 sudo gem install chef --no-rdoc --no-ri
 
 echo "Setting up chef-solo..."
-sudo env SSL_CRT=$SSL_CRT SSL_KEY=$SSL_KEY FQDN=$FQDN ruby $CHEF_REPO_ROOT/setup/setup-chef-solo-config.rb
+sudo env SSL_CRT=$SSL_CRT SSL_KEY=$SSL_KEY FQDN=$FQDN CHEF_ROLE=$CHEF_ROLE ruby $CHEF_REPO_ROOT/setup/setup-chef-solo-config.rb

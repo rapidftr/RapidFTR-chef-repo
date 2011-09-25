@@ -1,5 +1,10 @@
 include_recipe "rapid_ftr::base"
 
+service "solr" do
+  supports :restart => true
+  action [:enable, :start]
+end
+
 directory "/srv/rapid_ftr/shared" do
   owner "root"
   group "root"
