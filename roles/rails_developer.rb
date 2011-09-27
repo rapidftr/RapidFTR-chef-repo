@@ -7,8 +7,8 @@ description "RapidFTR Rails dev machine."
 run_list(
   "recipe[apt]",
   "recipe[build-essential]",
-  "recipe[passenger::install]",
   "recipe[erlang]",
   "recipe[couchdb]",
   "recipe[git]",
-  "recipe[rapid_ftr::rails_developer]")
+  "recipe[rapid_ftr::rails_developer]",
+  "recipe[passenger::install]")

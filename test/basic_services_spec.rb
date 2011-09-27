@@ -33,6 +33,11 @@ describe "Basic Services:" do
       response_from(:http, 5984, '/')['body'].should include(
         '"couchdb":"Welcome"')
     end
+
+    describe "seeding" do
+      it "should allow login as the rapidftr user"
+      it "should have created the default forms"
+    end
   end
 
   def response_from protocol, port, path
