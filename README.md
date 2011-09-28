@@ -28,8 +28,8 @@ Start with a publicly accessible server (or one that will be made publicly acces
 
 * Now download and untar this repository.
 
-		wget --no-check-certificate https://github.com/downloads/duelinmarkers/RapidFTR-chef-repo/chef-repo-3226f1.tgz
-		tar xzf chef-repo-3226f1.tgz
+		wget --no-check-certificate https://github.com/downloads/duelinmarkers/RapidFTR-chef-repo/chef-repo-e58a0cc.tgz
+		tar xzf chef-repo-e58a0cc.tgz
 		cd chef-repo/
 		sudo ./setup-ubuntu.sh
 
@@ -42,8 +42,6 @@ Start with a publicly accessible server (or one that will be made publicly acces
 *	Now run chef-solo to install the application and its dependencies.
 
 		sudo chef-solo # This will take an uncomfortably long time (ie, more than 10 minutes).
-		cd /srv/rapid_ftr/current
-		sudo rake couchdb:create db:seed RAILS_ENV=production
 
 You should be all set. Open your browser to https://YOURSERVER/ and login with username and password "rapidftr." If you're really planning to use this instance, change your username and password now.
 

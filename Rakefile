@@ -8,7 +8,7 @@ rescue LoadError
 end
 
 $vagrant_dir = File.join(File.dirname(__FILE__), 'test/vagrant')
-$tarball_name = 'RapidFTR-chef-repo-test.tgz'
+$tarball_name = "chef-repo-#{`git log --oneline -1`.split(' ').first}.tgz"
 
 namespace :common do
   task :boot do
