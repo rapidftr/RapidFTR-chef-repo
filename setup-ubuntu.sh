@@ -2,6 +2,7 @@
 
 RUBY_VERSION=1.8.7-p352
 RUBYGEMS_VERSION=1.7.2
+CHEF_VERSION=0.10.4 # 0.10.6 depends on json <= 1.6.1 which has an invalid gemspec
 
 INITIAL_DIR=`pwd`
 cd `dirname $0`
@@ -31,7 +32,7 @@ cd rubygems-$RUBYGEMS_VERSION
 sudo ruby setup.rb --no-format-executable
 
 echo "Installing chef..."
-sudo gem install chef --no-rdoc --no-ri
+sudo gem install chef --version $CHEF_VERSION --no-rdoc --no-ri
 
 echo "Setting up chef-solo..."
 sudo env SSL_CRT=$SSL_CRT SSL_KEY=$SSL_KEY FQDN=$FQDN CHEF_ROLE=$CHEF_ROLE ruby $CHEF_REPO_ROOT/setup/setup-chef-solo-config.rb
