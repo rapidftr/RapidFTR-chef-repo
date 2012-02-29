@@ -1,10 +1,10 @@
 Vagrant::Config.run do |config|
   config.vm.box = "lucid32"
   # for prod-simulation testing
-  config.vm.forward_port("prod-app-http", 80, 3080)
-  config.vm.forward_port("prod-app-https", 443, 3443)
+  config.vm.forward_port 80, 3080
+  config.vm.forward_port 443, 3443
   # for development
-  config.vm.forward_port("dev-app-http", 3000, 3000)
-  config.vm.forward_port("dev-couch-http", 5984, 5984)
+  config.vm.forward_port 3000, 3000
+  config.vm.forward_port 5984, 5984
 end
 

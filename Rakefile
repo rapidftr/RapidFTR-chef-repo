@@ -115,6 +115,8 @@ namespace :ec2 do
 end
 
 class Machine
+  include Rake::DSL
+
   attr_accessor :ssh_options, :ssh_host, :ssh_user, :public_dns_name, :additional_env_for_setup
 
   def boot_and_register_for_termination
@@ -133,7 +135,7 @@ class VagrantMachine < Machine
   def initialize
     cd $vagrant_dir do
       sh "vagrant up"
-      sh "vagrant ssh_config > vagrant.ssh.config"
+      sh "vagrant ssh-config > vagrant.ssh.config"
       @ssh_options = "-F #{File.expand_path('vagrant.ssh.config')}"
     end
     @ssh_host = 'default'
