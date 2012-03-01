@@ -6,6 +6,7 @@ include_recipe 'rapid_ftr::base'
 
 package 'xvfb'
 package 'firefox'
+package 'curl'
 
 cookbook_file "/etc/init.d/xvfb" do
   source "xvfb.init"
