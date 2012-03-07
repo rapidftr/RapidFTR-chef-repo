@@ -115,7 +115,6 @@ namespace :ec2 do
 end
 
 class Machine
-  include Rake::DSL
 
   attr_accessor :ssh_options, :ssh_host, :ssh_user, :public_dns_name, :additional_env_for_setup
 
