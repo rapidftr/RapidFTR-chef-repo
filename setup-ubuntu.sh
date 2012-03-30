@@ -1,8 +1,8 @@
 #!/bin/bash
 
-RUBY_VERSION=1.8.7-p352
-RUBYGEMS_VERSION=1.7.2
-CHEF_VERSION=0.10.4 # 0.10.6 depends on json <= 1.6.1 which has an invalid gemspec
+RUBY_VERSION=1.8.7-p358
+RUBYGEMS_VERSION=1.8.21
+CHEF_VERSION=0.10.8
 
 INITIAL_DIR=`pwd`
 cd `dirname $0`
