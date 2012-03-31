@@ -9,6 +9,7 @@ gem "rake"
 gem "vagrant", "0.9.7"
 gem "amazon-ec2"
 gem "pry"
+gem "fog"
 
 group :test do
   gem "rspec-core"

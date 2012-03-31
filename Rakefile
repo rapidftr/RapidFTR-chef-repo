@@ -2,6 +2,7 @@ begin
   require 'rspec/core/rake_task'
   require 'AWS'
   require 'pry'
+  require 'fog'
 rescue LoadError
   puts "\nMaybe you need a bundle install."
   raise
@@ -64,6 +65,18 @@ namespace :vagrant do
 
   task :package => %w( vagrant:configure common:env_for_dev_machine common:provision ) do
     $machine.package
+  end
+
+  task :publish do
+    key_id, key, = ec2_auth_stuff
+    connection = Fog::Storage.new :provider => 'AWS', :aws_secret_access_key => key, :aws_access_key_id => key_id
+    directory = connection.directories.get 'RapidFTR-dist'
+    puts "Uploading file to #{directory.inspect}"
+    file = directory.files.create(
+      :key => "rails_developer_20120328.box",
+      :body => File.open("../rails_developer_20120328.box"),
+      :public => true)
+    puts "Published #{file.public_url}"
   end
 end
 
@@ -223,21 +236,21 @@ class Ec2Machine < Machine
     @public_dns_name = 'www.rapidftr.dev'
   end
 
-  def ec2_auth_stuff
-    key_id = ENV['AMAZON_ACCESS_KEY_ID']
-    key = ENV['AMAZON_SECRET_ACCESS_KEY'] ||
-      (ENV['AMAZON_SECRET_ACCESS_KEY_FILE'] && `cat #{ENV['AMAZON_SECRET_ACCESS_KEY_FILE']}`.chomp) ||
-      raise("AMAZON_SECRET_ACCESS_KEY or AMAZON_SECRET_ACCESS_KEY_FILE is required")
-    id_file = ENV['RAPID_FTR_IDENTITY_FILE']
-    [key_id, key, id_file]
-  end
-
   def ec2_instance_stuff
     instance_type = ENV['EC2_INSTANCE_TYPE'] || 'c1.medium'
     ami = ENV['EC2_AMI'] || 'ami-7000f019' # Ubuntu 10.04 LTS Lucid instance-store from http://alestic.com/
     ssh_user = ENV['EC2_AMI_DEFAULT_USER'] || 'ubuntu'
     [instance_type, ami, ssh_user]
   end
+end
+
+def ec2_auth_stuff
+  key_id = ENV['AMAZON_ACCESS_KEY_ID']
+  key = ENV['AMAZON_SECRET_ACCESS_KEY'] ||
+    (ENV['AMAZON_SECRET_ACCESS_KEY_FILE'] && `cat #{ENV['AMAZON_SECRET_ACCESS_KEY_FILE']}`.chomp) ||
+    raise("AMAZON_SECRET_ACCESS_KEY or AMAZON_SECRET_ACCESS_KEY_FILE is required")
+  id_file = ENV['RAPID_FTR_IDENTITY_FILE']
+  [key_id, key, id_file]
 end
 
 def wait seconds, reason
