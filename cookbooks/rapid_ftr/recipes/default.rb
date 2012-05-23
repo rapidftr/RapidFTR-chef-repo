@@ -58,7 +58,7 @@ deploy_revision "/srv/rapid_ftr" do
   user "root"
   enable_submodules true
   migrate true
-  migration_command "/usr/local/bin/bundle install && rake -t couchdb:create db:seed"
+  migration_command "/usr/local/bin/bundle install --without=cucumber && rake -t couchdb:create db:seed"
   environment "RAILS_ENV" => "production"
   shallow_clone true
   action :deploy
