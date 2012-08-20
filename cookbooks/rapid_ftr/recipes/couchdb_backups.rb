@@ -12,7 +12,9 @@ databases = %w(
   rapidftr_child_production
   rapidftr_form_section_production
   rapidftr_user_production
+  rapidftr_device_production
   rapidftr_sessions_production
+  rapidftr_password_recovery_request_production
   rapidftr_contact_information_production
   rapidftr_suggested_field_production
   )
