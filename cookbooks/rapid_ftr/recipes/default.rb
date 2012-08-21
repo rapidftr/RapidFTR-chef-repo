@@ -52,13 +52,18 @@ directory "/srv/rapid_ftr/shared/system/bb-builds" do
   action :create
 end
 
+so_called_migration_command = "/usr/local/bin/bundle install --without=cucumber && rake -t couchdb:create"
+if node[:rapid_ftr][:should_seed_db]
+  so_called_migration_command << ' db:seed'
+end
+
 deploy_revision "/srv/rapid_ftr" do
   repo node[:rapid_ftr][:repository]
   revision node[:rapid_ftr][:revision]
   user "root"
   enable_submodules true
   migrate true
-  migration_command "/usr/local/bin/bundle install --without=cucumber && rake -t couchdb:create db:seed"
+  migration_command so_called_migration_command
   environment "RAILS_ENV" => "production"
   shallow_clone true
   action :deploy
