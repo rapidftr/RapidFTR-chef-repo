@@ -4,12 +4,24 @@ require 'fileutils'
 require 'erb'
 require 'readline'
 
-def get env_var, prompt
+def get env_var, prompt, valid_values = nil
   if env_value? env_var
-    puts "Using #{env_var} #{ENV[env_var]}"
-    ENV[env_var]
+    env_value = ENV[env_var]
+    if valid_values && !valid_values.include(env_value)
+      raise "Invalid value #{env_value} for #{env_var} in environment"
+    end
+    puts "Using #{env_var} #{env_value}"
+    env_value
   else
-    Readline.readline prompt
+    attempts = 0
+    value = nil
+    loop do
+      raise "Invalid value #{value}. Needed one of #{valid_values.inspect}" if attempts > 3
+      value = Readline.readline prompt
+      attempts += 1
+      break if valid_values.nil? || valid_values.include?(value)
+    end
+    value
   end
 end
 
