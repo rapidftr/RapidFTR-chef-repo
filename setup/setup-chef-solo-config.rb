@@ -7,7 +7,7 @@ require 'readline'
 def get env_var, prompt, valid_values = nil
   if env_value? env_var
     env_value = ENV[env_var]
-    if valid_values && !valid_values.include(env_value)
+    if valid_values && !valid_values.include?(env_value)
       raise "Invalid value #{env_value} for #{env_var} in environment"
     end
     puts "Using #{env_var} #{env_value}"
