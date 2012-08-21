@@ -54,6 +54,10 @@ END
 puts "
 
 **************************************************************
+
+  Welcome to RapidFTR setup!
+
+**************************************************************
 To generate chef-solo node configuration, we need some information.
 
 What chef role should this server have? If it will be a primary server,
@@ -143,7 +147,7 @@ END
 
 puts "
 **************************************************************
-Chef should now be configured to run locally. If your SSL certificate
-files are in place, run
+Chef should now be configured to run locally. If any files you've
+promised are in place, run the following command to install:
 sudo chef-solo
-to install RapidFTR."
+"
