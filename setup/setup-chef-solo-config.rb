@@ -56,15 +56,27 @@ puts "
 **************************************************************
 To generate chef-solo node configuration, we need some information.
 
-First we'll deal with SSL certificates. Please provide the locations
+What chef role should this server have? If it will be a primary server,
+the role should be 'default'. If it will be a backup server, the role
+should be 'backup'. You'll be prompted for different information later,
+depending on which role you choose.
+"
+
+chef_role = get 'CHEF_ROLE', "Enter the chef role, either 'default' or 'backup':", %w[ default backup ]
+
+if chef_role == 'default'
+  puts "
+
+**************************************************************
+Next we'll deal with SSL certificates. Please provide the locations
 where these files can be found. It's ok if the files aren't there yet,
 just be sure to put them there before you run chef-solo.
 "
 
-ssl_crt = File.expand_path get('SSL_CRT', "Enter the location of your certificate file (often ends in '.crt'):")
-ssl_key = File.expand_path get('SSL_KEY', "Enter the location of your certificate key file (often ends in '.key'):")
+  ssl_crt = File.expand_path get('SSL_CRT', "Enter the location of your certificate file (often ends in '.crt'):")
+  ssl_key = File.expand_path get('SSL_KEY', "Enter the location of your certificate key file (often ends in '.key'):")
 
-puts "
+  puts "
 
 **************************************************************
 Now we need to know the public domain name of your application.
@@ -74,7 +86,46 @@ will probably guess
 If that's what you want, you can just hit enter.
 "
 
-fqdn = get 'FQDN', "Enter the publicly accessible domain name of your server:"
+  fqdn = get 'FQDN', "Enter the publicly accessible domain name of your server:"
+
+  role_properties = <<-END
+		"ssl_certificate": "#{ssl_crt}",
+		"ssl_certificate_key": "#{ssl_key}"
+		#{%(,"app_server_fqdn":"#{fqdn}") unless fqdn.empty?}
+  END
+else # role == backup
+  puts "
+
+**************************************************************
+Next we need some information for the backup server to be able
+to create an ssh connection to the main server without being
+prompted for a password. You'll need a username and hostname
+for the main server and the local path to the private key file
+whose corresponding public key will be in the user's
+authorized_keys file on the main server.
+"
+
+  app_server_ssh_user = get 'APP_SERVER_SSH_USER', "Enter the ssh username for the connection:"
+  app_server_ssh_hostname = get 'APP_SERVER_SSH_HOSTNAME', "Enter the ssh hostname for the connection:"
+  backup_server_ssh_key = get 'BACKUP_SERVER_SSH_KEY', "Enter the path to the private key file:"
+
+  puts "
+
+**************************************************************
+Next we need an email address to receive the output from the
+backup cron job, which runs every five minutes. There should
+only be output if there's a problem with the backup.
+"
+
+  backup_mailto = get 'BACKUP_MAILTO', "Backup notification email address:"
+
+  role_properties = <<-END
+		"app_server_ssh_user": "#{app_server_ssh_user}",
+		"app_server_ssh_hostname": "#{app_server_ssh_hostname}",
+		"backup_server_ssh_key": "#{backup_server_ssh_key}",
+		"backup_mailto": "#{backup_mailto}"
+  END
+end
 
 puts "
 
@@ -83,12 +134,10 @@ puts "
 write_file node_attribute_file, <<-END
 {
 	"rapid_ftr":{
-		"ssl_certificate": "#{ssl_crt}",
-		"ssl_certificate_key": "#{ssl_key}"
-		#{%(,"app_server_fqdn":"#{fqdn}") unless fqdn.empty?}
+#{role_properties}
 	},
 	"passenger":{ "production":{ "bins_path": "/usr/local/bin" } },
-	"run_list":["role[#{env_value?('CHEF_ROLE') ? ENV['CHEF_ROLE'] : 'default'}]"]
+	"run_list":["role[#{chef_role}]"]
 }
 END
 

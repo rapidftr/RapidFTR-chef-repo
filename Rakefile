@@ -29,6 +29,7 @@ namespace :common do
     sh %(ssh #{$machine.ssh_options} #{$machine.ssh_host} "cd chef-repo/ && \
         sudo \
           env \
+            CHEF_ROLE=default \
             SSL_CRT=/home/#{$machine.ssh_user}/localhost.rapidftr.test.crt \
             SSL_KEY=/home/#{$machine.ssh_user}/localhost.rapidftr.test.key \
             FQDN=#{$machine.public_dns_name} \
