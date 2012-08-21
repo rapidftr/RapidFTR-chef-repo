@@ -68,38 +68,47 @@ depending on which role you choose.
 
 chef_role = get 'CHEF_ROLE', "Enter the chef role, either 'default' or 'backup':", %w[ default backup ]
 
-if chef_role == 'default'
-  puts "
+puts "
 
 **************************************************************
 Next we'll deal with SSL certificates. Please provide the locations
 where these files can be found. It's ok if the files aren't there yet,
 just be sure to put them there before you run chef-solo.
 "
+if chef_role == 'backup'
+  puts "Since this is a backup server, you may not have a CA-signed certificate
+to use on this machine. A self-signed certificate is probably fine.
+"
+end
 
-  ssl_crt = File.expand_path get('SSL_CRT', "Enter the location of your certificate file (often ends in '.crt'):")
-  ssl_key = File.expand_path get('SSL_KEY', "Enter the location of your certificate key file (often ends in '.key'):")
+ssl_crt = File.expand_path get('SSL_CRT', "Enter the location of your certificate file (often ends in '.crt'):")
+ssl_key = File.expand_path get('SSL_KEY', "Enter the location of your certificate key file (often ends in '.key'):")
 
-  puts "
+puts "
 
 **************************************************************
-Now we need to know the public domain name of your application.
+Now we need to know the public domain name of this server.
+The application will be served from the domain name you provide.
 Chef will guess this if you don't provide it. On this server it
 will probably guess
     #{`hostname --fqdn`}
 If that's what you want, you can just hit enter.
 "
+if chef_role == 'backup'
+  puts "Since this is a backup server, this domain name should probably
+not be known to most users and may not be very user-friendly.
+"
+end
 
-  fqdn = get 'FQDN', "Enter the publicly accessible domain name of your server:"
+fqdn = get 'FQDN', "Enter the publicly accessible domain name of this server:"
 
-  role_properties = <<-END
+role_properties = <<-END
 		"ssl_certificate": "#{ssl_crt}",
-		"ssl_certificate_key": "#{ssl_key}",
-		"should_seed_db": true
+		"ssl_certificate_key": "#{ssl_key}"
 		#{%(,"app_server_fqdn":"#{fqdn}") unless fqdn.empty?}
-  END
+END
 
-else # role == backup
+if chef_role == 'backup'
 
   puts "
 
@@ -126,8 +135,8 @@ only be output if there's a problem with the backup.
 
   backup_mailto = get 'BACKUP_MAILTO', "Backup notification email address:"
 
-  role_properties = <<-END
-		"app_server_ssh_user": "#{app_server_ssh_user}",
+  role_properties << <<-END
+		,"app_server_ssh_user": "#{app_server_ssh_user}",
 		"app_server_ssh_hostname": "#{app_server_ssh_hostname}",
 		"backup_server_ssh_key": "#{backup_server_ssh_key}",
 		"backup_mailto": "#{backup_mailto}",
