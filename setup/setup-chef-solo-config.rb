@@ -94,10 +94,13 @@ If that's what you want, you can just hit enter.
 
   role_properties = <<-END
 		"ssl_certificate": "#{ssl_crt}",
-		"ssl_certificate_key": "#{ssl_key}"
+		"ssl_certificate_key": "#{ssl_key}",
+		"should_seed_db": true
 		#{%(,"app_server_fqdn":"#{fqdn}") unless fqdn.empty?}
   END
+
 else # role == backup
+
   puts "
 
 **************************************************************
@@ -127,7 +130,8 @@ only be output if there's a problem with the backup.
 		"app_server_ssh_user": "#{app_server_ssh_user}",
 		"app_server_ssh_hostname": "#{app_server_ssh_hostname}",
 		"backup_server_ssh_key": "#{backup_server_ssh_key}",
-		"backup_mailto": "#{backup_mailto}"
+		"backup_mailto": "#{backup_mailto}",
+		"should_seed_db": false
   END
 end
 
