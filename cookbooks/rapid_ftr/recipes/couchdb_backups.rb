@@ -23,5 +23,6 @@ cron "replicate_every_five_minutes" do
   ssh_key = node[:rapid_ftr][:backup_server_ssh_key]
   command "/usr/bin/couchdb_replicate.rb -s #{ssh_target} -i #{ssh_key} -d #{databases.join(',')}"
   mailto node[:rapid_ftr][:backup_mailto]
+  path "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
   minute "*/5"
 end
