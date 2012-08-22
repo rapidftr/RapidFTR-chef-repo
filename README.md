@@ -38,13 +38,25 @@ Start with a publicly accessible server (or one that will be made publicly acces
 
 	*	Respond to prompts for SSL certificate files with reasonable locations.
 
-*	If you haven't already, copy SSL certificate files into the locations.
+*	If you haven't already, copy SSL certificate files into the locations. See below for help generating a certificate.
 
 *	Now run chef-solo to install the application and its dependencies.
 
 		sudo chef-solo # This will take an uncomfortably long time (ie, more than 10 minutes).
 
 You should be all set. Open your browser to https://YOURSERVER/ and login with username and password "rapidftr." If you're really planning to use this instance, change your username and password now.
+
+## Generating an SSL certificate
+
+This page has instructions for creating and self-signing a certificate: http://www.akadia.com/services/ssh_test_certificate.html
+
+Briefly, here are the commands we've used:
+
+		openssl genrsa -des3 -out test.key 1024                        # generate private key
+		openssl req -new -key test.key -out test.csr   # generate certificate signing request
+		cp test.key test.key.org
+		openssl rsa -in test.key.org -out test.key               # remove passphrase from key
+		openssl x509 -req -days 365 -in test.csr -signkey test.key -out test.crt  # self-sign
 
 ## Contributing ##
 
