@@ -1,5 +1,4 @@
-# Note this assumes the backup databases already exist.
-# We could handle that here or it could be handled inside couchdb_replicate.rb.
+include_recipe "rapid_ftr::default"
 
 cookbook_file "/usr/bin/couchdb_replicate.rb" do
   source "couchdb_replicate.rb"
