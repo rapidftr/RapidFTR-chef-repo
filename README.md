@@ -28,7 +28,7 @@ Start with a publicly accessible server (or one that will be made publicly acces
 
 * Now download and untar this repository.
 
-		wget --no-check-certificate https://github.com/downloads/duelinmarkers/RapidFTR-chef-repo/chef-repo-e58a0cc.tgz
+		wget --no-check-certificate https://github.com/downloads/duelinmarkers/RapidFTR-chef-repo/chef-repo-6b2158e.tgz
 		mkdir chef-repo
 		cd chef-repo
 		tar xzf ../chef-repo-e58a0cc.tgz
