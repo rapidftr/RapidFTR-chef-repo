@@ -10,7 +10,7 @@ The RapidFTR server application repository can be found at <https://github.com/j
 
 If you have any questions about anything here, please ask on the RapidFTR Google Group: <http://groups.google.com/group/rapidftr>
 
-## Usage ##
+## Main Production Server Setup ##
 
 Here are the steps required for a production deployment:
 
@@ -36,9 +36,11 @@ Start with a publicly accessible server (or one that will be made publicly acces
 
 	*	Say yes when prompted to install packages.
 
-	*	Respond to prompts for SSL certificate files with reasonable locations.
+	*	Answer 'default' when prompted for a role.
 
-*	If you haven't already, copy SSL certificate files into the locations. See below for help generating a certificate.
+	*	Respond to prompts for further information, reading the prompts carefully.
+
+*	If you haven't already, copy SSL certificate files into the locations you provided during the previous step. See below for help generating a certificate.
 
 *	Now run chef-solo to install the application and its dependencies.
 
@@ -46,9 +48,15 @@ Start with a publicly accessible server (or one that will be made publicly acces
 
 You should be all set. Open your browser to https://YOURSERVER/ and login with username and password "rapidftr." If you're really planning to use this instance, change your username and password now.
 
+## Backup Production Server Setup ##
+
+You can optionally provision a second server that can serve as a backup instance in case the first instance crashes. It will be configured to pull all data from the main instance every five minutes.
+
+To configure a backup instance, follow the same instructions as above, but when asked what role the server should have, answer 'backup' instead of 'default.' The interactive setup script will instruct you to take some additional manual steps to get the backup instance configured correctly.
+
 ## Generating an SSL certificate
 
-This page has instructions for creating and self-signing a certificate: http://www.akadia.com/services/ssh_test_certificate.html
+Instructions for creating and self-signing a certificate can be found at <http://www.akadia.com/services/ssh_test_certificate.html>.
 
 Briefly, here are the commands we've used:
 
