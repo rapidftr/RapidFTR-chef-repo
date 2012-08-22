@@ -114,23 +114,34 @@ if chef_role == 'backup'
 
 **************************************************************
 Next we need some information for the backup server to be able
-to create an ssh connection to the main server without being
+to create an SSH connection to the main server without being
 prompted for a password. You'll need a username and hostname
-for the main server and the local path to the private key file
-whose corresponding public key will be in the user's
+for the main server and the local path to the private SSH key
+file whose corresponding public key will be in the user's
 authorized_keys file on the main server.
+
+If you don't already have an SSH key to use, you can generate
+one on this server using the following command.
+  ssh-keygen
+When prompted for a passphrase, leave it blank. That will
+create two files in the current user's ~/.ssh directory. The
+file with no extension is the private key file. The file with
+the .pub extension is the public key file.
 "
 
   app_server_ssh_user = get 'APP_SERVER_SSH_USER', "Enter the ssh username for the connection:"
   app_server_ssh_hostname = get 'APP_SERVER_SSH_HOSTNAME', "Enter the ssh hostname for the connection:"
-  backup_server_ssh_key = get 'BACKUP_SERVER_SSH_KEY', "Enter the path to the private key file:"
+  backup_server_ssh_key = File.expand_path get('BACKUP_SERVER_SSH_KEY', "Enter the path to the private key file:")
 
   puts "
 
 **************************************************************
 Next we need an email address to receive the output from the
-backup cron job, which runs every five minutes. There should
-only be output if there's a problem with the backup.
+backup cron job, which runs every five minutes. We haven't
+configured the machine to send email to external addresses, so
+unless you have done so already or you intend to do so later,
+you should just use the username of the account that you'll use
+when you log into this server.
 "
 
   backup_mailto = get 'BACKUP_MAILTO', "Backup notification email address:"
@@ -159,8 +170,29 @@ write_file node_attribute_file, <<-END
 END
 
 puts "
-**************************************************************
-Chef should now be configured to run locally. If any files you've
-promised are in place, run the following command to install:
-sudo chef-solo
+**************************************************************"
+
+if chef_role == 'backup'
+  puts "Before running chef-solo, you should get the SSH keys in place and
+test that the root user can connect to the main server without
+being prompted for a password or to accept a new RSA fingerprint
+from the main server.
+
+If you haven't already, copy the contents of your public key
+(probably #{backup_server_ssh_key}.pub) onto their own line in
+the file authorized_keys in #{app_server_ssh_user}'s .ssh directory
+on #{app_server_ssh_hostname}.
+
+Now test that root can log into the main server with the following command:
+  sudo ssh -i #{backup_server_ssh_key} #{app_server_ssh_user}@#{app_server_ssh_hostname} \"echo connection OK\"
+"
+end
+
+puts "Chef should now be configured to run locally. If you think
+any of the settings you've provided need to be changed, you can
+change them directly in #{node_attribute_file}.
+
+If all files you've referenced are in place, run the following
+command to install and start RapidFTR.
+  sudo chef-solo
 "
