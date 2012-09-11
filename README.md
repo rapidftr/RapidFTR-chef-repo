@@ -2,7 +2,7 @@
 
 This code supports automated deployment for [RapidFTR](http://rapidftr.com/). It's targeted at enabling anyone with a Linux server to set up their own production-ready instance of RapidFTR with as little manual setup as possible. The implementation is [chef](http://www.opscode.com/chef/)-based, utilizing chef-solo.
 
-At the moment automated deployment is only tested on Ubuntu, but we're interested in supporting other Linux distributions and POSIX OSs. (If you want to test and add support for another, see "Contributing" and "Other Platforms" below.)
+At the moment automated deployment is only supported on Ubuntu 10.04 LTS, but we're interested in supporting other Linux distributions and POSIX OSs. (If you want to test and add support for another, see "Contributing" and "Other Platforms" below.)
 
 The most up-to-date version of this code is currently at <https://github.com/duelinmarkers/RapidFTR-chef-repo>.
 
@@ -14,7 +14,7 @@ If you have any questions about anything here, please ask on the RapidFTR Google
 
 Here are the steps required for a production deployment:
 
-Start with a publicly accessible server (or one that will be made publicly accessible). (Linode and Amazon EC2 are both good for this.)
+Start with a publicly accessible server (or one that will later be made publicly accessible) running Ubuntu 10.04 LTS. (Linode and Amazon EC2 are both good for this.)
 
 *	SSH into your server:
 
