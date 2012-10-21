@@ -4,7 +4,7 @@ This code supports automated deployment for [RapidFTR](http://rapidftr.com/). It
 
 At the moment automated deployment is only supported on Ubuntu 10.04 LTS, but we're interested in supporting other Linux distributions and POSIX OSs. (If you want to test and add support for another, see "Contributing" and "Other Platforms" below.)
 
-The most up-to-date version of this code is currently at <https://github.com/duelinmarkers/RapidFTR-chef-repo>.
+The most up-to-date version of this code is currently at <https://github.com/rapidftr/RapidFTR-chef-repo>.
 
 The RapidFTR server application repository can be found at <https://github.com/jorgej/RapidFTR>.
 
@@ -28,7 +28,7 @@ Start with a publicly accessible server (or one that will later be made publicly
 
 * Now download and untar this repository.
 
-		wget --no-check-certificate https://github.com/downloads/duelinmarkers/RapidFTR-chef-repo/chef-repo-6b2158e.tgz
+		wget --no-check-certificate https://github.com/downloads/rapidftr/RapidFTR-chef-repo/chef-repo-6b2158e.tgz
 		mkdir chef-repo
 		cd chef-repo
 		tar xzf ../chef-repo-e58a0cc.tgz
@@ -74,7 +74,7 @@ To develop on the deployment platform:
 
 *	Clone this repository.
 
-		git clone https://github.com/duelinmarkers/RapidFTR-chef-repo.git
+		git clone https://github.com/rapidftr/RapidFTR-chef-repo.git
 
 * Set up the rvm gemset we expect, and cd in to your clone. You should see a message from rvm prompting you to accept our ruby interpreter version and gemset.
 
