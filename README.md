@@ -6,7 +6,7 @@ At the moment automated deployment is only supported on Ubuntu 10.04 LTS, but we
 
 The most up-to-date version of this code is currently at <https://github.com/rapidftr/RapidFTR-chef-repo>.
 
-The RapidFTR server application repository can be found at <https://github.com/jorgej/RapidFTR>.
+The RapidFTR server application repository can be found at <https://github.com/rapidftr/RapidFTR>.
 
 If you have any questions about anything here, please ask on the RapidFTR Google Group: <http://groups.google.com/group/rapidftr>
 
