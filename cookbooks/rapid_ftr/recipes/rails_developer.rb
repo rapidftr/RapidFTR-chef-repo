@@ -25,9 +25,3 @@ service 'xvfb' do
   supports :restart => true
   action [:enable, :start]
 end
-
-service 'solr' do # not needed, but we may as well have it.
-  supports :restart => true
-  action [:disable]
-end
-

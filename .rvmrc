@@ -1,1 +1,1 @@
-rvm ruby-1.8.7-p352@RapidFTR-chef-repo
+rvm --create use ruby-1.8.7@RapidFTR-chef-repo

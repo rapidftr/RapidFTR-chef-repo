@@ -53,19 +53,6 @@ directory "#{nginx_path}/conf/sites.d" do
   notifies :reload, 'service[passenger]'
 end
 
-template "#{nginx_path}/conf/sites.d/site.conf" do
-  source 'site.conf.erb'
-  owner 'root'
-  group 'root'
-  mode 0644
-  variables(
-    :nginx_path => nginx_path,
-    :fqdn => node[:rapid_ftr][:app_server_fqdn],
-    :ssl_certificate => node[:rapid_ftr][:ssl_certificate],
-    :ssl_certificate_key => node[:rapid_ftr][:ssl_certificate_key]
-  )
-end
-
 template "#{nginx_path}/conf/nginx.conf" do
   source "nginx.conf.erb"
   owner "root"

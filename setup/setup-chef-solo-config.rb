@@ -26,7 +26,7 @@ def get env_var, prompt, valid_values = nil
 end
 
 def env_value? env_var
-  ENV[env_var] && ENV[env_var] != ''
+  !ENV[env_var].to_s.empty?
 end
 
 def write_file name, content
