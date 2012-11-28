@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+#^syntax detection
+
+site 'http://community.opscode.com/api/v1'
+
+cookbook 'git', '2.0.0'
+cookbook 'couchdb', '1.0.4'
+cookbook 'passenger', '0.0.1'
+cookbook 'java', '1.6.4'
+cookbook 'ssl', '0.0.1', :path => 'vendor/cookbooks/ssl'
