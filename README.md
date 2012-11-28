@@ -20,7 +20,9 @@ Start with a publicly accessible server (or one that will later be made publicly
 
 *	If you're logged in as root and don't yet have an admin account (which is likely on Linode but not otherwise):
 
-		adduser admin # When prompted, provide a strong password. You can leave everything else blank.
+		adduser admin
+		# When prompted, provide a strong password. You can leave everything else blank.
+		# If it says "group admin already exists" try: adduser admin --ingroup admin
 		usermod -a -G sudo admin
 	
 	*	Now log out and log back in as admin.
@@ -28,11 +30,8 @@ Start with a publicly accessible server (or one that will later be made publicly
 
 * Now download and untar this repository.
 
-		wget --no-check-certificate https://github.com/downloads/rapidftr/RapidFTR-chef-repo/chef-repo-6b2158e.tgz
-		mkdir chef-repo
-		cd chef-repo
-		tar xzf ../chef-repo-e58a0cc.tgz
-		sudo ./setup-ubuntu.sh
+		wget 'https://github.com/rapidftr/RapidFTR-chef-repo/archive/master.tar.gz' -O - | tar xz
+		sudo RapidFTR-chef-repo-master/setup-ubuntu.sh
 
 	*	Say yes when prompted to install packages.
 
