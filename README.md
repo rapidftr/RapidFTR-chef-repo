@@ -20,7 +20,9 @@ Start with a publicly accessible server (or one that will later be made publicly
 
 *	If you're logged in as root and don't yet have an admin account (which is likely on Linode but not otherwise):
 
-		adduser admin # When prompted, provide a strong password. You can leave everything else blank.
+		adduser admin
+		# When prompted, provide a strong password. You can leave everything else blank.
+		# If it says "group admin already exists" try: adduser admin --ingroup admin
 		usermod -a -G sudo admin
 	
 	*	Now log out and log back in as admin.
@@ -28,43 +30,24 @@ Start with a publicly accessible server (or one that will later be made publicly
 
 * Now download and untar this repository.
 
-		wget --no-check-certificate https://github.com/downloads/rapidftr/RapidFTR-chef-repo/chef-repo-6b2158e.tgz
-		mkdir chef-repo
-		cd chef-repo
-		tar xzf ../chef-repo-e58a0cc.tgz
-		sudo ./setup-ubuntu.sh
+		wget 'https://github.com/rapidftr/RapidFTR-chef-repo/archive/master.tar.gz' -O - | tar xz
+		sudo RapidFTR-chef-repo-master/setup-ubuntu.sh
 
-	*	Say yes when prompted to install packages.
+	*	If you haven't already, copy SSL certificate files into the locations you provided during the previous step.
+	  To generate a certificate, see https://minglehosting.thoughtworks.com/rapidftr/projects/rapidftr/cards/1415
+	  The certificates "server.cer" and "server.key" must be placed under vendor/cookbooks/ssl/files/default/
 
-	*	Answer 'default' when prompted for a role.
+	*	Now run chef-solo to install the application and its dependencies.
+		sudo chef-solo -c solo.rb -o role[default]
 
-	*	Respond to prompts for further information, reading the prompts carefully.
+	* That's it, the server is now configured
 
-*	If you haven't already, copy SSL certificate files into the locations you provided during the previous step. See below for help generating a certificate.
-
-*	Now run chef-solo to install the application and its dependencies.
-
-		sudo chef-solo # This will take an uncomfortably long time (ie, more than 10 minutes).
+	* Now to deploy instances of RapidFTR in it, use Capistrano. In future, that will also be integrated along with the configuration.
+	  From the RapidFTR repository in your local machine:
+	  cap deploy
+	  And follow the on screen instructions by providing the URL to the server you just configured
 
 You should be all set. Open your browser to https://YOURSERVER/ and login with username and password "rapidftr." If you're really planning to use this instance, change your username and password now.
-
-## Backup Production Server Setup ##
-
-You can optionally provision a second server that can serve as a backup instance in case the first instance crashes. It will be configured to pull all data from the main instance every five minutes.
-
-To configure a backup instance, follow the same instructions as above, but when asked what role the server should have, answer 'backup' instead of 'default.' The interactive setup script will instruct you to take some additional manual steps to get the backup instance configured correctly.
-
-## Generating an SSL certificate
-
-Instructions for creating and self-signing a certificate can be found at <http://www.akadia.com/services/ssh_test_certificate.html>.
-
-Briefly, here are the commands we've used:
-
-		openssl genrsa -des3 -out test.key 1024                        # generate private key
-		openssl req -new -key test.key -out test.csr   # generate certificate signing request
-		cp test.key test.key.org
-		openssl rsa -in test.key.org -out test.key               # remove passphrase from key
-		openssl x509 -req -days 365 -in test.csr -signkey test.key -out test.crt  # self-sign
 
 ## Contributing ##
 
@@ -124,5 +107,3 @@ We use chef-solo because usage of chef-server (or the Opscode Platform) assumes 
 ## Other Platforms ##
 
 While we've developed for and tested on Ubuntu 10.04, we want RapidFTR to work on other Linux distributions. We've created continuous integration builds using other AMIs, but at this time no one has yet undertaken the work to get things passing. See the [RapidFTR Deployment continuous integration builds](http://ci.rapidftr.com:8111/project.html?projectId=project3&tab=projectOverview) for current state.
-
-
