@@ -26,8 +26,8 @@ template "#{passenger_path}/conf/nginx.conf" do
   group "root"
   mode 0644
   variables(
-    :passenger_path => `passenger-config --root`.chomp,
-    :ruby_path => `which ruby`.chomp,
+    :passenger_path => exec("passenger-config --root").chomp,
+    :ruby_path => exec("which ruby").chomp,
     :pidfile => File.join(passenger_path, "nginx.pid"),
     :passenger => passenger,
     :ssl => ssl

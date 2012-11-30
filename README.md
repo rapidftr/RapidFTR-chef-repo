@@ -10,9 +10,32 @@ The RapidFTR server application repository can be found at <https://github.com/r
 
 If you have any questions about anything here, please ask on the RapidFTR Google Group: <http://groups.google.com/group/rapidftr>
 
-## Main Production Server Setup ##
+## Cookbooks ##
 
-Here are the steps required for a production deployment:
+We are using Librarian-Chef to download cookbooks from the Chef Opscode website.
+The "cookbooks" folder is dynamically generated.
+For more details on what is downloaded, please check the Cheffile.
+
+To download the cookbooks, run:
+
+  * bundle install
+  * librarian-chef install
+
+## Base Server ##
+
+The Server on which you plan to deploy RapidFTR must have the following in order for Chef-Solo to run.
+
+  * a user account with root/sudo privileges
+  * ruby >= 1.8.7
+  * rubygems >= 1.3.6
+  * bundler
+  * signed SSL certificate and private key (server.crt and server.key)
+
+It is recommended that you choose a server which has all these packages pre-installed. If you are trying to setup a bare minimal server with none of the above - then first you should install those and then proceed to run Chef solo.
+
+## Setting up a Bare Minimum Server ##
+
+Here are the steps required to setup a bare minimum server.
 
 Start with a publicly accessible server (or one that will later be made publicly accessible) running Ubuntu 10.04 LTS. (Linode and Amazon EC2 are both good for this.)
 
@@ -37,17 +60,24 @@ Start with a publicly accessible server (or one that will later be made publicly
 	  To generate a certificate, see https://minglehosting.thoughtworks.com/rapidftr/projects/rapidftr/cards/1415
 	  The certificates "server.cer" and "server.key" must be placed under vendor/cookbooks/ssl/files/default/
 
-	*	Now run chef-solo to install the application and its dependencies.
-		sudo chef-solo -c solo.rb -o role[default]
+## Running Chef Solo to Provision the Server ##
 
-	* That's it, the server is now configured
+If the server is ready with the minimum requirements, then we can provision RapidFTR on it by running a single command:
 
-	* Now to deploy instances of RapidFTR in it, use Capistrano. In future, that will also be integrated along with the configuration.
-	  From the RapidFTR repository in your local machine:
-	  cap deploy
-	  And follow the on screen instructions by providing the URL to the server you just configured
+	*	sudo chef-solo -c solo.rb -o role[default]
 
-You should be all set. Open your browser to https://YOURSERVER/ and login with username and password "rapidftr." If you're really planning to use this instance, change your username and password now.
+That's it, the server is now configured.
+
+## Deploying RapidFTR ##
+
+Now to deploy instances of RapidFTR in it, use Capistrano. In future, that will also be integrated along with the configuration.
+		* From the RapidFTR repository in your local machine, run:
+
+	  		cap deploy
+
+		  And follow the on screen instructions by providing the URL to the server you just configured
+
+You should be all set. Open your browser to https://YOURSERVER:YOURPORT/ and login with username and password "rapidftr." If you're really planning to use this instance, change your username and password now.
 
 ## Contributing ##
 
@@ -69,6 +99,10 @@ To develop on the deployment platform:
 *	Run bundler. (rvm adds the bundler gem to gemsets by default, so you should have it already.)
 
 		bundle install
+
+* Run librarian. (librarian downloads required cookbooks from the Chef Opscode site.)
+
+		librarian-chef install
 
 * Add the vagrant box that we use as our VM base. There's more info about boxes on Vagrant's site (<http://vagrantup.com/docs/getting-started/boxes.html>).
 
