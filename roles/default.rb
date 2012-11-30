@@ -5,5 +5,5 @@ run_list(
   "recipe[couchdb]",
   "recipe[java]",
   "recipe[passenger::daemon]",
-  "recipe[ssl]"
+  "recipe[rapidftr_ssl]"
 )

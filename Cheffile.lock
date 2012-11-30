@@ -18,15 +18,14 @@ SITE
     yum (2.0.2)
 
 PATH
-  remote: vendor/cookbooks/ssl
+  remote: custom-cookbooks/rapidftr_ssl
   specs:
-    ssl (0.0.1)
-      passenger (>= 0.0.0)
+    rapidftr_ssl (0.0.1)
 
 DEPENDENCIES
   couchdb (= 1.0.4)
   git (= 2.0.0)
   java (= 1.6.4)
   passenger (= 0.0.1)
-  ssl (= 0.0.1)
+  rapidftr_ssl (= 0.0.1)
 

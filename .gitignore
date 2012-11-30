@@ -1,6 +1,8 @@
+*.out
 .rake_test_cache
 .bundle
 .idea/
 tmp/
 cookbooks/
-vendor/cookbooks/ssl/files/default/
+custom-cookbooks/ssl/files/default/
+
