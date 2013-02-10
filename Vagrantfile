@@ -1,5 +1,5 @@
 Vagrant::Config.run do |config|
-  config.vm.box = "lucid32"
+  config.vm.box = "precise32"
   config.vm.network :bridged
 
   config.vm.provision :chef_solo do |chef|

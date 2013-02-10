@@ -1,14 +1,14 @@
 name "default"
 description "RapidFTR server, with CouchDB, Solr, and Passenger-via-Nginx installed."
 run_list(
-  "recipe[git]",
-  "recipe[erlang]",
-  "recipe[spidermonkey]",
-  "recipe[couchdb::source]",
-  "recipe[java::oracle]",
+  # "recipe[git]",
+  # "recipe[erlang]",
+  # "recipe[spidermonkey]",
+  # "recipe[couchdb::source]",
+  # "recipe[java::oracle]",
+  # "recipe[imagemagick::rmagick]",
   "recipe[passenger::daemon]",
-  "recipe[imagemagick::rmagick]"
-#  "recipe[rapidftr_ssl]"
+  "recipe[rapidftr_ssl]"
 )
 
 override_attributes({

@@ -64,7 +64,16 @@ Start with a publicly accessible server (or one that will later be made publicly
 
 If the server is ready with the minimum requirements, then we can provision RapidFTR on it by running a single command:
 
-	*	sudo chef-solo -c solo.rb -o role[default]
+  * Ensure that the chef cookbooks are downloaded:
+    librarian-chef install
+
+  * NOTE: At this point, we need to patch one cookbook (that of CouchDB)
+    Edit cookbooks/couchdb/recipes/source.rb
+    Search and change "compile_flags" to "--enable-js-trunk", and remove the old compile flags that are already there
+    You need to do this each time after you install librarian-chef install
+
+	*	No go ahead and start provisioning
+	  sudo chef-solo -c solo.rb -o role[default]
 
 That's it, the server is now configured.
 
