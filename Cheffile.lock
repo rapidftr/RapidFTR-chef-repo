@@ -2,8 +2,10 @@ SITE
   remote: http://community.opscode.com/api/v1
   specs:
     build-essential (1.2.0)
-    couchdb (1.0.4)
+    chef_handler (1.1.4)
+    couchdb (2.1.0)
       erlang (>= 0.0.0)
+      yum (>= 0.0.0)
     dmg (1.0.0)
     erlang (1.1.2)
       yum (>= 0.5.0)
@@ -13,9 +15,12 @@ SITE
       runit (>= 0.0.0)
       yum (>= 0.0.0)
     imagemagick (0.2.2)
-    java (1.6.4)
+    java (1.9.2)
+      windows (>= 0.0.0)
     passenger (0.0.1)
     runit (0.16.0)
+    windows (1.8.2)
+      chef_handler (>= 0.0.0)
     yum (2.0.2)
 
 PATH
@@ -23,11 +28,19 @@ PATH
   specs:
     rapidftr_ssl (0.0.1)
 
+PATH
+  remote: custom-cookbooks/spidermonkey
+  specs:
+    spidermonkey (0.0.1)
+      erlang (>= 0.0.0)
+
 DEPENDENCIES
-  couchdb (= 1.0.4)
+  couchdb (= 2.1.0)
+  erlang (= 1.1.2)
   git (= 2.0.0)
   imagemagick (= 0.2.2)
-  java (= 1.6.4)
+  java (= 1.9.2)
   passenger (= 0.0.1)
   rapidftr_ssl (= 0.0.1)
+  spidermonkey (= 0.0.1)
 

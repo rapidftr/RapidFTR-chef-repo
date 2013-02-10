@@ -9,7 +9,7 @@ gem "rake", "0.8.7"
 gem "librarian", "0.0.25"
 
 group :deploy do
-  gem "vagrant", "0.9.7"
+  gem "vagrant", "1.0.6"
   gem "amazon-ec2"
   gem "pry"
   gem "fog"
